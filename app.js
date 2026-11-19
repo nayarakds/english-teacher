@@ -59,7 +59,7 @@
 
   // ---------- mascotes ----------
   // Inspirados nas ilustrações de referência: formas planas e orgânicas, rosto só com dois
-  // arcos finos nos olhos e um objeto em traço fino preto ligado ao tema (viewBox 200 x 170).
+  // arcos finos nos olhos, duas bolinhas da cor do corpo como mãos (seguram o objeto, como na referência) e um objeto em traço fino preto ligado ao tema (viewBox 200 x 170).
   var INK = "#262B3D";
   var LW = 2.3;
   function ln(fill) { return 'fill="' + (fill || "none") + '" stroke="' + INK + '" stroke-width="' + LW + '" stroke-linecap="round" stroke-linejoin="round"'; }
@@ -105,7 +105,7 @@
           // balde de pipoca
           '<g ' + ln("#FFF6D6") + '><circle cx="80" cy="26" r="8"/><circle cx="94" cy="19" r="9"/><circle cx="108" cy="19" r="9"/><circle cx="121" cy="26" r="8"/></g><path d="M72 28h56l-6 26H78z" ' + ln("#fff") + '/><path d="M84 28l1.5 26M100 28v26M116 28l-1.5 26" stroke="#FF6B5B" stroke-width="5" fill="none"/>' + dome(78, 54, b) + dome(122, 54, b),
           // óculos 3D
-          '<rect x="68" y="80" width="26" height="20" rx="6" fill="#FF4B4B" fill-opacity=".62" ' + ln().replace('fill="none" ', "") + '/><rect x="106" y="80" width="26" height="20" rx="6" fill="#3A86FF" fill-opacity=".62" ' + ln().replace('fill="none" ', "") + '/><path d="M94 88h12M68 86l-9-3M132 86l9-3" ' + ln() + '/>'
+          '<rect x="68" y="80" width="26" height="20" rx="6" fill="#FF4B4B" fill-opacity=".62" ' + ln().replace('fill="none" ', "") + '/><rect x="106" y="80" width="26" height="20" rx="6" fill="#3A86FF" fill-opacity=".62" ' + ln().replace('fill="none" ', "") + '/><path d="M94 88h12M68 86l-9-3M132 86l9-3" ' + ln() + '/><circle cx="58" cy="84" r="7.5" fill="' + b + '"/><circle cx="142" cy="84" r="7.5" fill="' + b + '"/>'
         ]
       };
     },
@@ -126,7 +126,7 @@
           // fones de ouvido
           '<path d="M66 124a34 34 0 0 1 68 0" ' + ln() + ' stroke-width="4"/><rect x="58" y="112" width="15" height="28" rx="7" fill="' + INK + '"/><rect x="127" y="112" width="15" height="28" rx="7" fill="' + INK + '"/>',
           // notas musicais
-          '<g ' + ln() + '><path d="M82 52V22l32-7v32M82 30l32-7"/><ellipse cx="76" cy="53" rx="8" ry="5.5" fill="' + INK + '" transform="rotate(-18 76 53)"/><ellipse cx="108" cy="46" rx="8" ry="5.5" fill="' + INK + '" transform="rotate(-18 108 46)"/></g>',
+          '<g ' + ln() + '><path d="M82 52V22l32-7v32M82 30l32-7"/><ellipse cx="76" cy="53" rx="8" ry="5.5" fill="' + INK + '" transform="rotate(-18 76 53)"/><ellipse cx="108" cy="46" rx="8" ry="5.5" fill="' + INK + '" transform="rotate(-18 108 46)"/></g><circle cx="82" cy="36" r="7.5" fill="' + b + '"/><circle cx="114" cy="30" r="7.5" fill="' + b + '"/>',
           // microfone
           '<g ' + ln() + '><circle cx="100" cy="28" r="14" fill="#fff"/><path d="M90 22l17 13M88 30l13 11M96 16l15 11"/><path d="M100 42v12"/></g><circle cx="86" cy="52" r="7.5" fill="' + b + '"/><circle cx="114" cy="52" r="7.5" fill="' + b + '"/>'
         ]
@@ -140,11 +140,11 @@
         box: "50 18 96 134",
         props: [
           // pincel
-          '<g transform="translate(28 0) rotate(-24 42 128)"><path d="M33 20c0-8 4-14 6-18 2 4 6 10 6 18z" ' + ln() + '/><rect x="31" y="20" width="16" height="12" rx="2" ' + ln() + '/><rect x="35" y="32" width="8" height="96" rx="4" ' + ln() + '/></g><circle cx="68" cy="134" r="11" fill="' + b + '"/>',
+          '<g transform="translate(28 0) rotate(-24 42 128)"><path d="M33 20c0-8 4-14 6-18 2 4 6 10 6 18z" ' + ln() + '/><rect x="31" y="20" width="16" height="12" rx="2" ' + ln() + '/><rect x="35" y="32" width="8" height="96" rx="4" ' + ln() + '/></g><circle cx="68" cy="134" r="11" fill="' + b + '"/><circle cx="78" cy="108" r="9" fill="' + b + '"/>',
           // paleta de tintas
-          '<ellipse cx="38" cy="104" rx="27" ry="22" transform="rotate(-18 38 104)" ' + ln("#fff") + '/><circle cx="26" cy="96" r="4" fill="#FF6B6B"/><circle cx="40" cy="88" r="4" fill="#4D96FF"/><circle cx="55" cy="93" r="4" fill="#FFD93D"/><circle cx="32" cy="113" r="4.5" ' + ln("#A58DB8") + '/><circle cx="64" cy="128" r="11" fill="' + b + '"/>',
+          '<ellipse cx="38" cy="104" rx="27" ry="22" transform="rotate(-18 38 104)" ' + ln("#fff") + '/><circle cx="26" cy="96" r="4" fill="#FF6B6B"/><circle cx="40" cy="88" r="4" fill="#4D96FF"/><circle cx="55" cy="93" r="4" fill="#FFD93D"/><circle cx="32" cy="113" r="4.5" ' + ln("#A58DB8") + '/><circle cx="64" cy="128" r="11" fill="' + b + '"/><circle cx="28" cy="128" r="9" fill="' + b + '"/>',
           // boina
-          '<ellipse cx="98" cy="26" rx="38" ry="13" transform="rotate(-8 98 26)" fill="#E8554E"/><circle cx="119" cy="12" r="4" fill="#E8554E"/>'
+          '<ellipse cx="98" cy="26" rx="38" ry="13" transform="rotate(-8 98 26)" fill="#E8554E"/><circle cx="119" cy="12" r="4" fill="#E8554E"/><circle cx="54" cy="100" r="9" fill="' + b + '"/><circle cx="142" cy="100" r="9" fill="' + b + '"/>'
         ]
       };
     },
@@ -174,13 +174,13 @@
         box: "38 16 80 128",
         props: [
           // megafone
-          '<g ' + ln() + '><path d="M124 80h-10v22h10"/><path d="M124 80l36-19v60l-36-19z"/><path d="M118 102l-4 18h12l2-18"/><path d="M168 78q9 13 0 26M176 70q14 21 0 42"/></g><circle cx="116" cy="108" r="11" fill="' + b + '"/>',
+          '<g ' + ln() + '><path d="M124 80h-10v22h10"/><path d="M124 80l36-19v60l-36-19z"/><path d="M118 102l-4 18h12l2-18"/><path d="M168 78q9 13 0 26M176 70q14 21 0 42"/></g><circle cx="116" cy="108" r="11" fill="' + b + '"/><circle cx="122" cy="84" r="9" fill="' + b + '"/>',
           // gráfico de barras
-          '<path d="M122 122V64M122 122h52" ' + ln() + '/><rect x="130" y="100" width="11" height="22" ' + ln("#fff") + '/><rect x="146" y="84" width="11" height="38" ' + ln("#fff") + '/><rect x="162" y="66" width="11" height="56" ' + ln("#fff") + '/><circle cx="114" cy="104" r="11" fill="' + b + '"/>',
+          '<path d="M122 122V64M122 122h52" ' + ln() + '/><rect x="130" y="100" width="11" height="22" ' + ln("#fff") + '/><rect x="146" y="84" width="11" height="38" ' + ln("#fff") + '/><rect x="162" y="66" width="11" height="56" ' + ln("#fff") + '/><circle cx="114" cy="104" r="11" fill="' + b + '"/><circle cx="126" cy="124" r="9" fill="' + b + '"/>',
           // alvo com flecha
-          '<circle cx="142" cy="86" r="28" ' + ln("#fff") + '/><circle cx="142" cy="86" r="19" ' + ln("#FF6B5B") + '/><circle cx="142" cy="86" r="9" ' + ln("#fff") + '/><path d="M142 86l26-26M168 60h-9M168 60v9" ' + ln() + '/><circle cx="114" cy="106" r="11" fill="' + b + '"/>',
+          '<circle cx="142" cy="86" r="28" ' + ln("#fff") + '/><circle cx="142" cy="86" r="19" ' + ln("#FF6B5B") + '/><circle cx="142" cy="86" r="9" ' + ln("#fff") + '/><path d="M142 86l26-26M168 60h-9M168 60v9" ' + ln() + '/><circle cx="114" cy="106" r="11" fill="' + b + '"/><circle cx="118" cy="76" r="9" fill="' + b + '"/>',
           // balão de curtida
-          '<rect x="122" y="48" width="58" height="44" rx="14" ' + ln("#fff") + '/><path d="M132 92l-8 16 20-16" ' + ln("#fff") + '/><path d="M151 82c-13-8-13-20-5-20 3 0 5 3 5 4 0-1 2-4 5-4 8 0 8 12-5 20z" fill="#FF4B4B"/><circle cx="114" cy="108" r="11" fill="' + b + '"/>'
+          '<rect x="122" y="48" width="58" height="44" rx="14" ' + ln("#fff") + '/><path d="M132 92l-8 16 20-16" ' + ln("#fff") + '/><path d="M151 82c-13-8-13-20-5-20 3 0 5 3 5 4 0-1 2-4 5-4 8 0 8 12-5 20z" fill="#FF4B4B"/><circle cx="114" cy="108" r="11" fill="' + b + '"/><circle cx="128" cy="94" r="9" fill="' + b + '"/>'
         ]
       };
     }
