@@ -237,7 +237,7 @@
       var done = saved.done[l.id];
       return '<button class="row-lesson' + (done ? " is-done" : "") + '" data-id="' + l.id + '">' +
         '<span class="dotc" style="background:' + t.panel + '"></span>' +
-        '<span class="rl-text"><span class="rl-n">' + l.id + '</span> ' + esc(l.title) + '<small>' + esc(l.grammar) + "</small></span>" +
+        '<span class="rl-text"><span class="rl-n">' + l.id + '</span> ' + esc(l.title) + '<small><span class="rl-theme" style="background:' + t.panel + '">' + esc(l.theme) + "</span>" + esc(l.grammar) + "</small></span>" +
         '<span class="rl-check">' + (done ? "✓" : "") + "</span></button>";
     }).join("");
     render(

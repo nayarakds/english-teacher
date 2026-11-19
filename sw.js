@@ -1,5 +1,5 @@
 // Cache simples para o app abrir offline. Troque a versão ao alterar qualquer arquivo.
-var CACHE = "english-teacher-v21";
+var CACHE = "english-teacher-v22";
 var FILES = ["./", "index.html", "style.css", "app.js", "lessons.js", "manifest.webmanifest", "icon.svg"];
 
 self.addEventListener("install", function (e) {

@@ -236,3 +236,4 @@ details.all[open] summary::after { content: "–"; }
 .rl-n { color: var(--muted); margin-right: 4px; }
 .rl-check { font-weight: 700; color: var(--green); }
 .row-lesson.is-done .rl-text { color: var(--muted); }
+.rl-theme { display: inline-block; padding: 1px 9px; margin-right: 7px; border-radius: 99px; font-family: var(--heading); font-weight: 600; font-size: .72rem; color: var(--navy); vertical-align: 1px; }
