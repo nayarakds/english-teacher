@@ -111,15 +111,15 @@
     },
     // MÚSICA: sol de dedos em leque sobre uma base achatada
     sun: function (b) {
-      var rays = "", angs = [156, 128, 102, 78, 52, 24], lens = [60, 66, 72, 72, 66, 60];
+      var rays = "", angs = [160, 132, 104, 76, 48, 20], lens = [78, 82, 80, 80, 82, 78];
       angs.forEach(function (d, i) {
         var a = (Math.PI * d) / 180;
-        rays += "M100 124L" + (100 + lens[i] * Math.cos(a)).toFixed(1) + " " + (124 - lens[i] * Math.sin(a)).toFixed(1);
+        rays += "M100 126L" + (100 + lens[i] * Math.cos(a)).toFixed(1) + " " + (126 - lens[i] * Math.sin(a)).toFixed(1);
       });
       return {
-        body: '<path d="' + rays + '" stroke="' + b + '" stroke-width="20" stroke-linecap="round" fill="none"/><circle cx="100" cy="124" r="25" fill="' + b + '"/><rect x="18" y="124" width="164" height="26" rx="13" fill="' + b + '"/>',
-        face: [100, 111, 13],
-        box: "10 38 180 114",
+        body: '<path d="' + rays + '" stroke="' + b + '" stroke-width="18" stroke-linecap="round" fill="none"/><circle cx="100" cy="126" r="20" fill="' + b + '"/><rect x="18" y="124" width="164" height="26" rx="13" fill="' + b + '"/>',
+        face: [100, 114, 14],
+        box: "8 34 184 118",
         props: [
           // disco de vinil
           '<g ' + ln() + '><circle cx="100" cy="30" r="19"/><circle cx="100" cy="30" r="13.5"/><circle cx="100" cy="30" r="5"/></g><circle cx="80" cy="46" r="7.5" fill="' + b + '"/><circle cx="120" cy="46" r="7.5" fill="' + b + '"/>',
