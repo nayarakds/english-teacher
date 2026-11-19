@@ -100,19 +100,18 @@
         box: "50 46 100 100"
       };
     },
-    // sol de dedos grossos sobre uma base achatada, segurando um disco de vinil
+    // sol de dedos em leque, com vão entre eles, sobre uma base achatada, segurando um disco de vinil
     sun: function (b) {
-      var rays = "", tips = "", angs = [152, 126, 102, 78, 54, 28], lens = [56, 62, 68, 68, 62, 56];
+      var rays = "", angs = [156, 128, 102, 78, 52, 24], lens = [60, 66, 72, 72, 66, 60];
       angs.forEach(function (d, i) {
         var a = (Math.PI * d) / 180;
-        rays += "M100 122L" + (100 + lens[i] * Math.cos(a)).toFixed(1) + " " + (122 - lens[i] * Math.sin(a)).toFixed(1);
-        if (i === 2 || i === 3) tips += '<circle cx="' + (100 + (lens[i] + 3) * Math.cos(a)).toFixed(1) + '" cy="' + (122 - (lens[i] + 3) * Math.sin(a)).toFixed(1) + '" r="8" fill="' + b + '"/>';
+        rays += "M100 124L" + (100 + lens[i] * Math.cos(a)).toFixed(1) + " " + (124 - lens[i] * Math.sin(a)).toFixed(1);
       });
       return {
-        body: '<path d="' + rays + '" stroke="' + b + '" stroke-width="24" stroke-linecap="round" fill="none"/><path d="M68 126a32 32 0 0 1 64 0z" fill="' + b + '"/><rect x="16" y="122" width="168" height="28" rx="14" fill="' + b + '"/>',
-        face: [100, 114, 17],
-        prop: '<g ' + ln() + '><circle cx="96" cy="34" r="20"/><circle cx="96" cy="34" r="14.5"/><circle cx="96" cy="34" r="5.5"/><path d="M82 27a15 15 0 0 1 8-6M110 41a15 15 0 0 1-8 6"/></g>' + tips,
-        box: "8 36 184 118"
+        body: '<path d="' + rays + '" stroke="' + b + '" stroke-width="20" stroke-linecap="round" fill="none"/><circle cx="100" cy="124" r="25" fill="' + b + '"/><rect x="18" y="124" width="164" height="26" rx="13" fill="' + b + '"/>',
+        face: [100, 111, 13],
+        prop: '<g ' + ln() + '><circle cx="100" cy="30" r="19"/><circle cx="100" cy="30" r="13.5"/><circle cx="100" cy="30" r="5"/></g><circle cx="80" cy="46" r="7.5" fill="' + b + '"/><circle cx="120" cy="46" r="7.5" fill="' + b + '"/>',
+        box: "10 38 180 114"
       };
     },
     // mitene lilás de dois dedos largos, segurando um pincel
