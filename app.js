@@ -2,7 +2,16 @@
   "use strict";
 
   var app = document.getElementById("app");
-  var lessons = window.LESSONS || [];
+  var allLessons = window.LESSONS || [];
+  // agrupa na ordem de estudo definida em lessons.js (LESSON_GROUPS); o que ficar sem grupo vai para "Outras"
+  var groups = (window.LESSON_GROUPS || []).map(function (g) {
+    return { name: g.name, items: g.ids.map(function (id) { return allLessons.filter(function (l) { return l.id === id; })[0]; }).filter(Boolean) };
+  });
+  var grouped = [];
+  groups.forEach(function (g) { grouped = grouped.concat(g.items); });
+  var loose = allLessons.filter(function (l) { return grouped.indexOf(l) < 0; });
+  if (loose.length) groups.push({ name: "Outras", items: loose });
+  var lessons = grouped.concat(loose);
   var STORE = "english-teacher:v1";
 
   // ---------- estado salvo no celular (sem conta, sem placar) ----------
@@ -42,9 +51,7 @@
   var THEMES = {
     "Cinema":    { c: "#FF4242", soft: "#FFDAD5", dark: "#D62B2B", panel: "#C5CEF3", body: "#F98B4E", mascot: "star" },
     "Música":    { c: "#2781F9", soft: "#D8E8FF", dark: "#1A62D1", panel: "#EBE887", body: "#EE8888", mascot: "sun" },
-    "Arte":      { c: "#E0A800", soft: "#FFF1A8", dark: "#7A6200", panel: "#A58DB8", body: "#D9ADFF", mascot: "hand" },
-    "Design":    { c: "#28AF60", soft: "#D5F2E0", dark: "#1B8A49", panel: "#97E3B6", body: "#F7C84B", mascot: "squircle" },
-    "Marketing": { c: "#8B6FD1", soft: "#E6DDF8", dark: "#5E45A8", panel: "#F47A52", body: "#FFC9BC", mascot: "capsule" }
+    "Arte":      { c: "#E0A800", soft: "#FFF1A8", dark: "#7A6200", panel: "#A58DB8", body: "#D9ADFF", mascot: "hand" }
   };
   function themeOf(name) { return THEMES[name] || THEMES.Cinema; }
   function setAccent(themeName) {
@@ -232,13 +239,17 @@
     var next = lessons.filter(function (l) { return !saved.done[l.id]; })[0] || lessons[0];
     setAccent(next.theme);
     var doneCount = lessons.filter(function (l) { return saved.done[l.id]; }).length;
-    var list = lessons.map(function (l) {
-      var t = themeOf(l.theme);
-      var done = saved.done[l.id];
-      return '<button class="row-lesson' + (done ? " is-done" : "") + '" data-id="' + l.id + '">' +
-        '<span class="dotc" style="background:' + t.panel + '"></span>' +
-        '<span class="rl-text"><span class="rl-n">' + l.id + '</span> ' + esc(l.title) + '<small><span class="rl-theme" style="background:' + t.panel + '">' + esc(l.theme) + "</span>" + esc(l.grammar) + "</small></span>" +
-        '<span class="rl-check">' + (done ? "✓" : "") + "</span></button>";
+    var list = groups.map(function (g) {
+      var rows = g.items.map(function (l) {
+        var t = themeOf(l.theme);
+        var done = saved.done[l.id];
+        return '<button class="row-lesson' + (done ? " is-done" : "") + '" data-id="' + l.id + '">' +
+          '<span class="dotc" style="background:' + t.panel + '"></span>' +
+          '<span class="rl-text"><span class="rl-n">' + (lessons.indexOf(l) + 1) + '</span> ' + esc(l.title) + '<small><span class="rl-theme" style="background:' + t.panel + '">' + esc(l.theme) + "</span>" + esc(l.grammar) + "</small></span>" +
+          '<span class="rl-check">' + (done ? "✓" : "") + "</span></button>";
+      }).join("");
+      var n = g.items.filter(function (l) { return saved.done[l.id]; }).length;
+      return '<div class="grp"><h4>' + esc(g.name) + '<span>' + n + "/" + g.items.length + "</span></h4>" + rows + "</div>";
     }).join("");
     render(
       '<section class="hero">' +

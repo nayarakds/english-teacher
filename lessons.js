@@ -1,18 +1,18 @@
 // Lições do app, em formato compacto. Para criar uma lição nova, copie uma chamada T(...) abaixo.
 //
 // T(id, tema, gramática, título, M(...), [exercícios], [5 frases de troca], W(...))
-//   tema: "Cinema" | "Música" | "Arte" | "Design" | "Marketing" (define cor e mascote da lição)
+//   tema: "Cinema" | "Música" | "Arte" (define cor e mascote da lição)
 //   M(frase, tradução, quando usar, analogia, [fórmula], nota?)   frase com [colchetes] destaca a estrutura
 //   O(tradução, "bloco|bloco|bloco", "extra|extra", por quê, comentário no acerto)
 //       os blocos estão NA ORDEM CERTA; o app embaralha. A resposta é a junção dos blocos.
 //       Escreva exercícios com uma única ordem válida.
 //   C(frase com ___, [opções], índiceCerto, por quê, comentário no acerto)
-//   Troca: 5 pares [frase, tradução], sempre na ordem Cinema, Música, Arte, Design, Marketing.
+//   Troca: 3 pares [frase, tradução], sempre na ordem Cinema, Música, Arte.
 //   W(pedido, placeholder, [modelos], [checklist])
 //
 // Voz (speaking/listening) fica para uma fase 2: não há etapa de áudio por enquanto.
 (function () {
-  var THEMES = ["Cinema", "Música", "Arte", "Design", "Marketing"];
+  var THEMES = ["Cinema", "Música", "Arte"];
 
   function parse(s) {
     var out = [], re = /\[([^\]]+)\]/g, last = 0, m;
@@ -48,6 +48,16 @@
   }
 
   window.THEME_ORDER = THEMES;
+  // Grupos da home, na ordem de estudo. Cada lição aparece em um grupo (ids de T(...)).
+  window.LESSON_GROUPS = [
+    { name: "Present perfect", ids: [1, 2, 3, 4, 11] },
+    { name: "Passado", ids: [12, 5, 6, 10] },
+    { name: "Futuro", ids: [7, 8, 9] },
+    { name: "Preposições", ids: [13, 14, 15, 20] },
+    { name: "Phrasal verbs", ids: [16, 17, 18, 19, 21] },
+    { name: "Conectores", ids: [22, 23, 24, 28, 29] },
+    { name: "Frases mais longas", ids: [25, 26, 27, 30] }
+  ];
   window.LESSONS = [
 
     // ---------------------------------------------------------------- TEMPOS VERBAIS
@@ -78,9 +88,7 @@
       [
         ["I [have watched] this movie three times.", "Eu já assisti a esse filme três vezes."],
         ["I [have listened] to this album ten times.", "Eu já ouvi esse álbum dez vezes."],
-        ["I [have visited] this museum twice.", "Eu já visitei esse museu duas vezes."],
-        ["I [have used] this font in five projects.", "Eu já usei essa fonte em cinco projetos."],
-        ["I [have read] this brief four times.", "Eu já li esse briefing quatro vezes."]
+        ["I [have visited] this museum twice.", "Eu já visitei esse museu duas vezes."]
       ],
       W("Agora é com você. Escreva uma frase dizendo um filme ou série que você já viu e quantas vezes.", "I have watched ...",
         ["I have watched Barbie twice.", "I have seen every Wes Anderson movie.", "I have never watched a horror movie alone."],
@@ -114,9 +122,7 @@
       [
         ["I [watched] this movie in 2019.", "Eu assisti a esse filme em 2019."],
         ["I [saw] this band live in 2019.", "Eu vi essa banda ao vivo em 2019."],
-        ["I [visited] this museum in 2019.", "Eu visitei esse museu em 2019."],
-        ["I [designed] this logo in 2019.", "Eu desenhei esse logo em 2019."],
-        ["I [launched] this campaign in 2019.", "Eu lancei essa campanha em 2019."]
+        ["I [visited] this museum in 2019.", "Eu visitei esse museu em 2019."]
       ],
       W("Escreva uma frase sobre algo que você fez no ano passado, dizendo quando.", "Last year I ...",
         ["Last year I went to a concert in São Paulo.", "I watched that series two months ago.", "I visited a street art exhibition in 2023."],
@@ -150,69 +156,65 @@
       [
         ["I [have followed] this director [for] six years.", "Eu sigo esse diretor há seis anos."],
         ["I [have listened] to this band [since] 2018.", "Eu ouço essa banda desde 2018."],
-        ["I [have loved] this painter [for] ten years.", "Eu amo esse pintor há dez anos."],
-        ["I [have used] this font [since] 2020.", "Eu uso essa fonte desde 2020."],
-        ["I [have worked] in marketing [for] four years.", "Eu trabalho com marketing há quatro anos."]
+        ["I [have loved] this painter [for] ten years.", "Eu amo esse pintor há dez anos."]
       ],
       W("Escreva há quanto tempo você faz ou gosta de algo.", "I have ... for/since ...",
         ["I have liked horror movies since I was a kid.", "I have worked in this area for three years.", "I have followed this artist since 2020."],
         ["Tem have ou has?", "Usou for com uma duração ou since com um ponto de partida?", "O verbo está no particípio?"])
     ),
 
-    T(4, "Design", "Present perfect com already, yet e just", "Já fiz? Ainda não?",
-      M("I [have already finished] the logo.",
-        "Eu já terminei o logo.",
+    T(4, "Música", "Present perfect com already, yet e just", "Já fiz? Ainda não?",
+      M("I [have already heard] the new album.",
+        "Eu já ouvi o álbum novo.",
         "Três palavrinhas dão o clima do present perfect: already (já, em frases afirmativas), yet (ainda não ou já, em negativas e perguntas) e just (acabou de).",
-        "Pensa assim: já pensou numa lista de tarefas? Already é o check verde, yet é a caixinha ainda vazia, e just é o check que você acabou de marcar agora há pouco.",
-        ["already: afirmativas (I have already sent it)", "yet: negativas e perguntas, no fim (I haven't sent it yet / Have you sent it yet?)", "just: acabou de (I have just sent it)"],
+        "Pensa assim: é a sua fila de músicas. Already é a faixa que já tocou, yet é a que ainda não chegou, e just é a que acabou de terminar.",
+        ["already: afirmativas (I have already heard it)", "yet: negativas e perguntas, no fim (I haven't heard it yet / Have you heard it yet?)", "just: acabou de (I have just heard it)"],
         "No inglês americano, o passado simples também aparece com already e yet. Aqui seguimos com o present perfect, que funciona em qualquer lugar."),
       [
-        O("Eu ainda não terminei o design.", "I|haven't|finished|the design|yet.", "already",
-          "É uma frase negativa, então o yet vai pro fim. Haven't é have + not. Montando: I + haven't + finished + yet. O already é do lado afirmativo.",
-          "Yet no fim: a caixinha ainda vazia."),
-        O("Você já enviou o arquivo?", "Have|you|sent|the file|yet?", "already",
-          "É pergunta, então o have vem primeiro, e o yet fecha a frase. Send é irregular: o particípio é sent. Montando: Have + you + sent + the file + yet?",
-          "Pergunta de gerente de projeto, perfeita."),
-        C("I haven't chosen the colors ___.", ["already", "yet", "just"], 1,
+        O("Eu ainda não ouvi o álbum novo.", "I|haven't|heard|the new album|yet.", "already",
+          "É uma frase negativa, então o yet vai pro fim. Haven't é have + not. Hear é irregular: o particípio é heard. Montando: I + haven't + heard + the new album + yet. O already é do lado afirmativo.",
+          "Yet no fim: a faixa que ainda não tocou."),
+        O("Você já ouviu a música nova?", "Have|you|heard|the new song|yet?", "already",
+          "É pergunta, então o have vem primeiro, e o yet fecha a frase. Hear é irregular: o particípio é heard. Montando: Have + you + heard + the new song + yet?",
+          "Pergunta de quem quer trocar ideia sobre o lançamento."),
+        C("I haven't listened to the album ___.", ["already", "yet", "just"], 1,
           "Frase negativa pede yet no final. Already e just ficam nas afirmativas.",
           "Negativa e yet: o casal clássico."),
-        C("Look! The client has ___ approved the logo. It was a second ago!", ["just", "yet", "ever"], 0,
+        C("Look! The band has ___ posted a new single. It dropped a second ago!", ["just", "yet", "ever"], 0,
           "Just quer dizer acabou de, e é isso que a frase conta: aconteceu agora mesmo.",
           "Just: quentinho, acabou de sair do forno."),
-        C("I have ___ chosen the colors, so the hard part is done.", ["already", "yet", "ago"], 0,
+        C("I have ___ listened to this album twice, so I know every song.", ["already", "yet", "ago"], 0,
           "Frase afirmativa e o fato já está pronto: already. O yet ficaria numa negativa ou pergunta.",
-          "Already: check verde na lista.")
+          "Already: faixa que já tocou.")
       ],
       [
         ["I [have already watched] this series.", "Eu já assisti a essa série."],
-        ["I [have already heard] this album.", "Eu já ouvi esse álbum."],
-        ["I [have already visited] this museum.", "Eu já visitei esse museu."],
-        ["I [have already finished] the logo.", "Eu já terminei o logo."],
-        ["I [have already sent] the campaign brief.", "Eu já enviei o briefing da campanha."]
+        ["I [have already heard] the new album.", "Eu já ouvi o álbum novo."],
+        ["I [have already visited] this museum.", "Eu já visitei esse museu."]
       ],
       W("Escreva algo que você já fez hoje e algo que ainda não fez.", "I have already ..., but I haven't ... yet.",
-        ["I have already had coffee, but I haven't answered my emails yet.", "I have already finished the report, but I haven't sent it yet.", "I have just arrived, and I haven't started yet."],
+        ["I have already had coffee, but I haven't answered my messages yet.", "I have already seen the trailer, but I haven't watched the movie yet.", "I have just arrived, and I haven't started yet."],
         ["Usou already numa frase afirmativa?", "Usou haven't ou hasn't com yet no fim?", "O verbo está no particípio?"])
     ),
 
-    T(5, "Marketing", "Past continuous", "O que estava rolando?",
-      M("I [was reviewing] the campaign when you called.",
-        "Eu estava revisando a campanha quando você ligou.",
+    T(5, "Arte", "Past continuous", "O que estava rolando?",
+      M("I [was painting] a mural when you called.",
+        "Eu estava pintando um mural quando você ligou.",
         "O past continuous descreve uma ação que estava em andamento num momento do passado, geralmente como pano de fundo de outra coisa que aconteceu.",
-        "Pensa assim: é a cena de fundo de um filme. O passado simples é o que acontece em primeiro plano. Aqui, you called é o plot twist, e was reviewing é a cena que já estava rolando.",
+        "Pensa assim: é o fundo de um quadro. O passado simples é o que aparece em primeiro plano. Aqui, you called é o detalhe que chamou atenção, e was painting é o fundo que já estava lá.",
         ["I, he, she, it + was + verbo com -ing", "you, we, they + were + verbo com -ing"],
         "Verbos que terminam em -e perdem o e (write vira writing). Verbos curtos terminados em vogal + consoante dobram a consoante (run vira running)."),
       [
-        O("Ela estava escrevendo o texto da campanha.", "She|was writing|the campaign copy.", "were writing|wrote",
-          "O sujeito é she, então was. Write perde o e e vira writing. Montando: She + was + writing. Were é do you, we e they.",
-          "She estava escrevendo, a cena já rolava."),
-        O("Nós estávamos esperando a aprovação.", "We|were waiting|for|the approval.", "was waiting",
-          "O sujeito é we, então were. Montando: We + were + waiting. Lembre que wait pede for: waiting for the approval.",
-          "We were: o time todo esperando junto."),
-        C("They ___ a meeting when the power went out.", ["were having", "was having", "are having"], 0,
-          "O sujeito é they, então were, e a ação estava em andamento: were having. When the power went out é o corte da cena.",
-          "Were having: a reunião rolando e a luz caindo no meio."),
-        C("I ___ on the slides at midnight.", ["was working", "were working", "working"], 0,
+        O("Ela estava pintando um retrato.", "She|was painting|a portrait.", "were painting|painted",
+          "O sujeito é she, então was. Montando: She + was + painting + a portrait. Were é do you, we e they.",
+          "She estava pintando, a cena já rolava."),
+        O("Nós estávamos esperando a inauguração.", "We|were waiting|for|the opening.", "was waiting",
+          "O sujeito é we, então were. Montando: We + were + waiting. Lembre que wait pede for: waiting for the opening.",
+          "We were: o grupo todo esperando junto."),
+        C("They ___ a sculpture when the lights went out.", ["were making", "was making", "are making"], 0,
+          "O sujeito é they, então were, e a ação estava em andamento: were making. When the lights went out é o corte da cena.",
+          "Were making: a escultura rolando e a luz caindo no meio."),
+        C("I ___ on a sketch at midnight.", ["was working", "were working", "working"], 0,
           "O sujeito é I, então was. Were é de you, we e they. Montando: I + was + working.",
           "I was, nunca I were."),
         C("What ___ you doing when I called?", ["was", "were", "did"], 1,
@@ -222,12 +224,10 @@
       [
         ["I [was watching] a movie when you called.", "Eu estava assistindo a um filme quando você ligou."],
         ["I [was listening] to music when you called.", "Eu estava ouvindo música quando você ligou."],
-        ["I [was painting] a mural when you called.", "Eu estava pintando um mural quando você ligou."],
-        ["I [was sketching] a logo when you called.", "Eu estava esboçando um logo quando você ligou."],
-        ["I [was reviewing] the campaign when you called.", "Eu estava revisando a campanha quando você ligou."]
+        ["I [was painting] a mural when you called.", "Eu estava pintando um mural quando você ligou."]
       ],
       W("Escreva o que você estava fazendo quando algo inesperado aconteceu.", "I was ... when ...",
-        ["I was watching a series when the internet went down.", "She was presenting the plan when the screen froze.", "I was walking to work when it started to rain."],
+        ["I was watching a series when the internet went down.", "She was singing on stage when the mic stopped working.", "I was walking to work when it started to rain."],
         ["Usou was ou were?", "O verbo principal termina em -ing?", "Tem uma segunda ação no passado simples (when ...)?"])
     ),
 
@@ -258,9 +258,7 @@
       [
         ["While I [was watching] the movie, my phone [rang].", "Enquanto eu assistia ao filme, meu celular tocou."],
         ["While I [was listening] to the album, my phone [rang].", "Enquanto eu ouvia o álbum, meu celular tocou."],
-        ["While I [was painting], my phone [rang].", "Enquanto eu pintava, meu celular tocou."],
-        ["While I [was sketching], my phone [rang].", "Enquanto eu esboçava, meu celular tocou."],
-        ["While I [was writing] the brief, my phone [rang].", "Enquanto eu escrevia o briefing, meu celular tocou."]
+        ["While I [was painting], my phone [rang].", "Enquanto eu pintava, meu celular tocou."]
       ],
       W("Escreva algo que te interrompeu enquanto você fazia outra coisa.", "While I was ..., ...",
         ["While I was working, my laptop turned off.", "I was cooking when my sister called.", "While we were watching the show, the lights went out."],
@@ -294,12 +292,10 @@
       [
         ["I think this movie [will win] an award.", "Acho que esse filme vai ganhar um prêmio."],
         ["I think this song [will become] a hit.", "Acho que essa música vai virar um hit."],
-        ["I think this painting [will sell] fast.", "Acho que esse quadro vai vender rápido."],
-        ["I think this logo [will work] well.", "Acho que esse logo vai funcionar bem."],
-        ["I think this campaign [will go] viral.", "Acho que essa campanha vai viralizar."]
+        ["I think this painting [will sell] fast.", "Acho que esse quadro vai vender rápido."]
       ],
       W("Escreva uma previsão sobre algo da sua semana ou do seu trabalho.", "I think ... will ...",
-        ["I think the meeting will be short.", "I think this series will get a second season.", "I think the client will love the idea."],
+        ["I think the meeting will be short.", "I think this series will get a second season.", "I think my friends will love the idea."],
         ["Usou will antes do verbo?", "O verbo está na forma base (sem to, sem s)?", "É uma previsão ou decisão na hora?"])
     ),
 
@@ -330,35 +326,33 @@
       [
         ["I [am going to watch] a horror movie tonight.", "Eu vou assistir a um filme de terror hoje à noite."],
         ["I [am going to see] my favorite band tonight.", "Eu vou ver minha banda favorita hoje à noite."],
-        ["I [am going to paint] a mural this weekend.", "Eu vou pintar um mural neste fim de semana."],
-        ["I [am going to redesign] my portfolio this weekend.", "Eu vou redesenhar meu portfólio neste fim de semana."],
-        ["I [am going to launch] a new campaign next week.", "Eu vou lançar uma campanha nova na semana que vem."]
+        ["I [am going to paint] a mural this weekend.", "Eu vou pintar um mural neste fim de semana."]
       ],
       W("Escreva um plano seu para o fim de semana.", "I am going to ...",
         ["I am going to visit an art fair on Saturday.", "We are going to watch a movie tonight.", "I am going to organize my portfolio."],
         ["Usou am, is ou are antes de going to?", "Depois de going to vem o verbo na forma base?", "É um plano que você já decidiu?"])
     ),
 
-    T(9, "Design", "Present continuous para o futuro", "Já tá marcado",
-      M("I [am meeting] the client on Friday.",
-        "Eu vou me encontrar com o cliente na sexta.",
+    T(9, "Cinema", "Present continuous para o futuro", "Já tá marcado",
+      M("I [am watching] the premiere on Friday.",
+        "Eu vou assistir à estreia na sexta.",
         "Use o present continuous (am, is, are + -ing) junto com um dia ou horário para falar de compromissos combinados com alguém, tipo agenda.",
         "Pensa assim: o present continuous é o convite do calendário. Se tem dia, hora e outra pessoa envolvida, já está confirmado.",
-        ["am, is, are + verbo com -ing", "+ um momento futuro: tomorrow, on Friday, at 3 pm"],
-        "Sem a indicação de tempo, a frase fica no presente: I am meeting the client quer dizer que está acontecendo agora."),
+        ["am, is, are + verbo com -ing", "+ um momento futuro: tomorrow, on Friday, at 8 pm"],
+        "Sem a indicação de tempo, a frase fica no presente: I am watching the premiere quer dizer que está acontecendo agora."),
       [
-        O("Nós vamos apresentar o projeto às 15h.", "We|are presenting|the project|at 3 pm.", "is presenting",
-          "Compromisso marcado, com horário: present continuous. O sujeito é we, então are. Montando: We + are presenting + at 3 pm.",
+        O("Nós vamos assistir ao filme às 20h.", "We|are watching|the movie|at 8 pm.", "is watching",
+          "Compromisso marcado, com horário: present continuous. O sujeito é we, então are. Montando: We + are watching + at 8 pm.",
           "Horário marcado: present continuous na agenda."),
-        O("Ela vai encontrar o time de design amanhã.", "She|is meeting|the design team|tomorrow.", "are meeting",
+        O("Ela vai encontrar o elenco amanhã.", "She|is meeting|the cast|tomorrow.", "are meeting",
           "O sujeito é she, então is. Tomorrow dá o momento futuro. Montando: She + is meeting + tomorrow.",
-          "Is meeting: reunião confirmada."),
-        C("I ___ a workshop on Tuesday.", ["am attending", "attending", "attended"], 0,
+          "Is meeting: encontro confirmado."),
+        C("I ___ a film festival on Tuesday.", ["am attending", "attending", "attended"], 0,
           "Compromisso futuro com dia marcado: am + attending. Attended é passado, e attending sozinho fica sem o am.",
           "Tem dia marcado? Present continuous."),
-        C("They ___ the final files tomorrow morning.", ["is sending", "are sending", "sends"], 1,
-          "O sujeito é they, então are sending. Tomorrow morning dá o momento do compromisso.",
-          "Are sending: o plural pede are."),
+        C("They ___ the new trailer tomorrow morning.", ["is releasing", "are releasing", "releases"], 1,
+          "O sujeito é they, então are releasing. Tomorrow morning dá o momento do compromisso.",
+          "Are releasing: o plural pede are."),
         C("What time ___ you leaving tonight?", ["is", "are", "do"], 1,
           "O sujeito é you, então are: What time + are + you + leaving. Do não combina com o -ing.",
           "Are you leaving: pergunta de agenda.")
@@ -366,45 +360,41 @@
       [
         ["I [am watching] the premiere on Friday.", "Eu vou assistir à estreia na sexta."],
         ["I [am seeing] my favorite band on Friday.", "Eu vou ver minha banda favorita na sexta."],
-        ["I [am visiting] the exhibition on Friday.", "Eu vou visitar a exposição na sexta."],
-        ["I [am meeting] the client on Friday.", "Eu vou me encontrar com o cliente na sexta."],
-        ["I [am presenting] the campaign on Friday.", "Eu vou apresentar a campanha na sexta."]
+        ["I [am visiting] the exhibition on Friday.", "Eu vou visitar a exposição na sexta."]
       ],
       W("Escreva um compromisso que você já tem marcado.", "I am ... on ...",
-        ["I am having lunch with a friend on Saturday.", "We are presenting the plan on Monday.", "I am seeing a movie tomorrow night."],
+        ["I am having lunch with a friend on Saturday.", "We are watching a documentary on Monday.", "I am seeing a movie tomorrow night."],
         ["Usou am, is ou are + verbo com -ing?", "Tem um dia ou horário no futuro?", "É algo que já está combinado?"])
     ),
 
-    T(10, "Marketing", "Past perfect", "O que já tinha acontecido antes",
-      M("The meeting [had started] when I arrived.",
-        "A reunião já tinha começado quando eu cheguei.",
+    T(10, "Música", "Past perfect", "O que já tinha acontecido antes",
+      M("The concert [had started] when I arrived.",
+        "O show já tinha começado quando eu cheguei.",
         "O past perfect (had + particípio) mostra uma ação que já tinha acontecido antes de outro momento no passado.",
-        "Pensa assim: é o flashback do filme, a cena que mostra o que aconteceu antes da cena principal.",
+        "Pensa assim: é o flashback de um videoclipe, a cena que mostra o que aconteceu antes da cena principal.",
         ["had + particípio (igual para todos os sujeitos)", "Costuma vir junto de uma segunda ação no passado simples"],
         "Had é igual para I, you, he, she, we e they. Nada de has nem have: só had."),
       [
-        O("O cliente já tinha aprovado a campanha.", "The client|had|already|approved|the campaign.", "has",
-          "A aprovação aconteceu antes de outro momento do passado, então past perfect: had + approved. O has é do present perfect e não cabe aqui.",
-          "Had approved: o flashback da aprovação."),
-        O("Nós já tínhamos terminado quando ela chegou.", "We|had finished|when|she|arrived.", "have finished",
-          "Terminar aconteceu antes de chegar, então had finished vai na primeira ação, e arrived (passado simples) vai na segunda.",
-          "Had finished: o flashback, arrived: a cena principal."),
-        C("When I got to the office, the team ___ left.", ["had", "has", "was"], 0,
-          "O time saiu antes de eu chegar, então past perfect: had left. Has é do present perfect.",
+        O("A banda já tinha tocado a minha música favorita.", "The band|had|already|played|my favorite song.", "has",
+          "A banda tocou antes de outro momento do passado, então past perfect: had + played. O has é do present perfect e não cabe aqui.",
+          "Had played: ela tocou antes de você chegar."),
+        O("Nós já tínhamos chegado quando ela começou a cantar.", "We|had arrived|when|she|started singing.", "have arrived",
+          "Chegar aconteceu antes de começar a cantar, então had arrived vai na primeira ação, e started (passado simples) vai na segunda.",
+          "Had arrived: o flashback, started: a cena principal."),
+        C("When I got to the venue, the band ___ left.", ["had", "has", "was"], 0,
+          "A banda saiu antes de eu chegar, então past perfect: had left. Has é do present perfect.",
           "Had left: eles saíram antes da sua chegada."),
-        C("She ___ never seen that ad before the meeting.", ["had", "has", "was"], 0,
-          "O momento de referência é a reunião, no passado. Antes dela, ela nunca tinha visto o anúncio: had + never + seen.",
-          "Had never seen: primeira vez, no flashback."),
-        C("They had already ___ the budget.", ["spend", "spent", "spending"], 1,
-          "Depois de had vem o particípio. Spend é irregular: o particípio é spent.",
-          "Spent: irregular, mas daqueles que a gente aprende rápido.")
+        C("She ___ never heard that song before the concert.", ["had", "has", "was"], 0,
+          "O momento de referência é o show, no passado. Antes dele, ela nunca tinha ouvido a música: had + never + heard.",
+          "Had never heard: primeira vez, no flashback."),
+        C("They had already ___ all the tickets.", ["sell", "sold", "selling"], 1,
+          "Depois de had vem o particípio. Sell é irregular: o particípio é sold.",
+          "Sold: esgotou antes de você chegar.")
       ],
       [
         ["The movie [had started] when I arrived.", "O filme já tinha começado quando eu cheguei."],
         ["The concert [had started] when I arrived.", "O show já tinha começado quando eu cheguei."],
-        ["The exhibition [had opened] when I arrived.", "A exposição já tinha aberto quando eu cheguei."],
-        ["The presentation [had started] when I arrived.", "A apresentação já tinha começado quando eu cheguei."],
-        ["The meeting [had started] when I arrived.", "A reunião já tinha começado quando eu cheguei."]
+        ["The exhibition [had opened] when I arrived.", "A exposição já tinha aberto quando eu cheguei."]
       ],
       W("Escreva o que já tinha acontecido quando você chegou em algum lugar.", "When I arrived, ... had ...",
         ["When I arrived, the movie had already started.", "The store had closed when we got there.", "When I woke up, she had already left."],
@@ -438,9 +428,7 @@
       [
         ["I [have been watching] this series all day.", "Eu estou assistindo essa série o dia todo."],
         ["I [have been listening] to this album all day.", "Eu estou ouvindo esse álbum o dia todo."],
-        ["I [have been painting] this mural all day.", "Eu estou pintando esse mural o dia todo."],
-        ["I [have been designing] this logo all day.", "Eu estou desenhando esse logo o dia todo."],
-        ["I [have been writing] this brief all day.", "Eu estou escrevendo esse briefing o dia todo."]
+        ["I [have been painting] this mural all day.", "Eu estou pintando esse mural o dia todo."]
       ],
       W("Escreva algo que você está fazendo há um tempo.", "I have been ... for/since ...",
         ["I have been studying English for two months.", "She has been working on this project since January.", "We have been planning this trip for weeks."],
@@ -474,9 +462,7 @@
       [
         ["I [used to watch] cartoons every morning.", "Eu costumava assistir a desenhos toda manhã."],
         ["I [used to listen] to rock all the time.", "Eu costumava ouvir rock o tempo todo."],
-        ["I [used to draw] on every notebook.", "Eu costumava desenhar em todo caderno."],
-        ["I [used to design] posters for fun.", "Eu costumava desenhar cartazes por diversão."],
-        ["I [used to work] at a small agency.", "Eu costumava trabalhar numa agência pequena."]
+        ["I [used to draw] on every notebook.", "Eu costumava desenhar em todo caderno."]
       ],
       W("Escreva algo que você costumava fazer e não faz mais.", "I used to ...",
         ["I used to read comics every weekend.", "We used to play video games after school.", "I used to hate coffee."],
@@ -511,29 +497,27 @@
       [
         ["The movie starts [at] 8 pm.", "O filme começa às 20h."],
         ["The concert is [on] Saturday.", "O show é no sábado."],
-        ["The exhibition opens [in] June, [on] the 5th, [at] 9 am.", "A exposição abre em junho, no dia 5, às 9h."],
-        ["The workshop starts [at] 9 am [on] Monday.", "A oficina começa às 9h na segunda."],
-        ["The campaign launches [in] March.", "A campanha é lançada em março."]
+        ["The exhibition opens [in] June, [on] the 5th, [at] 9 am.", "A exposição abre em junho, no dia 5, às 9h."]
       ],
       W("Escreva quando algo vai acontecer, usando in, on ou at.", "The ... is at/on/in ...",
         ["The meeting is at 3 pm on Thursday.", "My birthday is in October.", "I wake up at 7 on weekdays."],
         ["Usou at para a hora exata?", "Usou on para o dia?", "Usou in para mês, ano ou parte do dia?"])
     ),
 
-    T(14, "Design", "Preposições de lugar: in, on, at", "Onde fica?",
-      M("The studio is [in] São Paulo, [on] Paulista Avenue, [at] number 100.",
-        "O estúdio fica em São Paulo, na Avenida Paulista, no número 100.",
+    T(14, "Música", "Preposições de lugar: in, on, at", "Onde fica?",
+      M("The club is [in] São Paulo, [on] Augusta Street, [at] number 100.",
+        "A casa de shows fica em São Paulo, na Rua Augusta, no número 100.",
         "Use in para espaços fechados e áreas grandes (cidades, países, salas), on para superfícies e ruas e at para pontos específicos (endereço, evento, lugar como destino).",
         "Pensa assim: in é estar dentro da caixa. On é estar em cima da mesa. At é o pino marcado no mapa.",
-        ["in: in a room, in Brazil, in the city", "on: on the wall, on the desk, on this street", "at: at the office, at the door, at the event"],
-        "At the office, at school, at home: usamos at quando o importante é a função do lugar."),
+        ["in: in a room, in Brazil, in the city", "on: on the wall, on the sofa, on this street", "at: at the studio, at the door, at the concert"],
+        "At school, at home, at the studio: usamos at quando o importante é a função do lugar."),
       [
-        O("Meu notebook está em cima da mesa.", "My laptop|is|on|the desk.", "in",
-          "A mesa é uma superfície e o notebook está em cima dela, então on. In seria dentro de algo, tipo in the bag.",
-          "On the desk: em cima da mesa, bem à vista."),
-        O("Ela está no escritório.", "She|is|at|the office.", "on",
-          "O escritório é um ponto de trabalho, e a ideia é a função do lugar, então at the office. On não funciona com office.",
-          "At the office: no ponto do trabalho."),
+        O("Meu violão está em cima do sofá.", "My guitar|is|on|the sofa.", "in",
+          "O sofá é uma superfície e o violão está em cima dele, então on. In seria dentro de algo, tipo in the case.",
+          "On the sofa: em cima do sofá, bem à vista."),
+        O("Ela está no estúdio.", "She|is|at|the studio.", "on",
+          "O estúdio é o ponto de trabalho dela, e a ideia é a função do lugar, então at the studio. On não funciona com studio.",
+          "At the studio: onde a música acontece."),
         C("The poster is ___ the wall.", ["in", "on", "at"], 1,
           "A parede é uma superfície, e o cartaz está nela: on the wall.",
           "On the wall: pregado na superfície."),
@@ -546,49 +530,45 @@
       ],
       [
         ["The premiere is [at] the cinema.", "A estreia é no cinema."],
-        ["The band is [on] stage.", "A banda está no palco."],
-        ["The painting is [on] the wall.", "O quadro está na parede."],
-        ["The studio is [in] São Paulo, [on] Paulista Avenue, [at] number 100.", "O estúdio fica em São Paulo, na Avenida Paulista, no número 100."],
-        ["The meeting is [at] the office.", "A reunião é no escritório."]
+        ["The club is [in] São Paulo, [on] Augusta Street, [at] number 100.", "A casa de shows fica em São Paulo, na Rua Augusta, no número 100."],
+        ["The painting is [on] the wall.", "O quadro está na parede."]
       ],
       W("Escreva onde você está agora ou onde algo fica.", "My ... is in/on/at ...",
         ["My phone is on the table.", "I am at work.", "The café is in the building next door."],
         ["Usou in para dentro ou área grande?", "Usou on para superfície ou rua?", "Usou at para um ponto específico?"])
     ),
 
-    T(15, "Marketing", "Verbos e adjetivos com preposição", "Quem anda com quem",
-      M("I am [good at] writing slogans and [interested in] branding.",
-        "Tenho facilidade para escrever slogans e interesse em branding.",
+    T(15, "Cinema", "Verbos e adjetivos com preposição", "Quem anda com quem",
+      M("I am [good at] guessing endings and [interested in] documentaries.",
+        "Tenho facilidade para adivinhar finais e interesse em documentários.",
         "Alguns adjetivos e verbos sempre andam com uma preposição específica. Não dá pra traduzir do português: é preciso aprender cada dupla.",
         "Pensa assim: são duplas fixas, tipo pipoca e cinema. Good at, interested in, depend on. Separar a dupla soa estranho.",
         ["good at, bad at, interested in, afraid of", "depend on, belong to, believe in", "depois da preposição, o verbo vai pro -ing: good at writing"],
         "Depois de preposição, use -ing: I am interested in learning, não interested in learn."),
       [
-        O("Ela é muito boa em apresentar ideias.", "She|is|really good|at|presenting ideas.", "in",
-          "A dupla é good at, e depois da preposição o verbo vai pro -ing: presenting. In não combina com good.",
+        O("Ela é muito boa em adivinhar o final.", "She|is|really good|at|guessing the ending.", "in",
+          "A dupla é good at, e depois da preposição o verbo vai pro -ing: guessing. In não combina com good.",
           "Good at: a dupla perfeita."),
-        O("Nós estamos interessados nesse público.", "We|are|interested|in|this audience.", "on",
+        O("Nós estamos interessados nesse diretor.", "We|are|interested|in|this director.", "on",
           "A dupla é interested in. On não serve aqui.",
           "Interested in: dupla clássica."),
-        C("I am afraid ___ speaking in public.", ["of", "at", "for"], 0,
-          "A dupla é afraid of, e depois de of o verbo vai pro -ing: speaking.",
+        C("I am afraid ___ watching horror movies alone.", ["of", "at", "for"], 0,
+          "A dupla é afraid of, e depois de of o verbo vai pro -ing: watching.",
           "Afraid of: quem tem medo, tem of."),
-        C("The success of a campaign depends ___ the message.", ["of", "on", "in"], 1,
+        C("The success of a movie depends ___ the story.", ["of", "on", "in"], 1,
           "A dupla é depend on. Of e in não combinam com depend.",
-          "Depends on: a campanha apoiada na mensagem."),
-        C("He is good at ___ slogans.", ["write", "writing", "wrote"], 1,
+          "Depends on: o filme apoiado na história."),
+        C("He is good at ___ scripts.", ["write", "writing", "wrote"], 1,
           "Depois de uma preposição (at), o verbo vai pro -ing: writing.",
           "Writing: depois da preposição, sempre -ing.")
       ],
       [
-        ["I am [interested in] documentary films.", "Eu tenho interesse em documentários."],
+        ["I am [good at] guessing endings and [interested in] documentaries.", "Tenho facilidade para adivinhar finais e interesse em documentários."],
         ["I am [interested in] jazz.", "Eu tenho interesse em jazz."],
-        ["I am [good at] drawing.", "Eu tenho facilidade para desenhar."],
-        ["I am [good at] designing posters.", "Eu tenho facilidade para desenhar cartazes."],
-        ["I am [good at] writing slogans and [interested in] branding.", "Tenho facilidade para escrever slogans e interesse em branding."]
+        ["I am [good at] drawing.", "Eu tenho facilidade para desenhar."]
       ],
       W("Escreva em que você tem facilidade e no que tem interesse.", "I am good at ... / I am interested in ...",
-        ["I am good at organizing events.", "I am interested in learning more about design.", "I am afraid of making mistakes, but I keep trying."],
+        ["I am good at organizing events.", "I am interested in learning more about music.", "I am afraid of making mistakes, but I keep trying."],
         ["Usou a preposição certa depois do adjetivo?", "O verbo depois da preposição está no -ing?", "A frase soa natural?"])
     ),
 
@@ -618,9 +598,7 @@
       [
         ["Can you [turn off] the lights?", "Você pode apagar as luzes?"],
         ["Can you [turn up] the music?", "Você pode aumentar a música?"],
-        ["Can you [put up] the poster?", "Você pode colocar o cartaz?"],
-        ["Can you [print out] the layout?", "Você pode imprimir o layout?"],
-        ["Can you [send over] the report?", "Você pode enviar o relatório?"]
+        ["Can you [put up] the poster?", "Você pode colocar o cartaz?"]
       ],
       W("Escreva um pedido usando um phrasal verb separável.", "Can you ...?",
         ["Can you turn it down a bit?", "Please write the address down.", "I need to pick the files up."],
@@ -654,83 +632,77 @@
       [
         ["I [ran into] an old friend at the movies.", "Eu esbarrei com um velho amigo no cinema."],
         ["I [ran into] my favorite singer yesterday.", "Eu esbarrei com meu cantor favorito ontem."],
-        ["I [ran into] a famous painter at the gallery.", "Eu esbarrei com um pintor famoso na galeria."],
-        ["I [ran into] my old design teacher.", "Eu esbarrei com meu antigo professor de design."],
-        ["I [ran into] a client at the airport.", "Eu esbarrei com um cliente no aeroporto."]
+        ["I [ran into] a famous painter at the gallery.", "Eu esbarrei com um pintor famoso na galeria."]
       ],
       W("Escreva sobre alguém que você encontrou sem querer ou de quem você cuida.", "I ran into ... / I look after ...",
         ["I ran into an old friend at the mall.", "I look after my sister's cat on weekends.", "I get on well with my team."],
         ["Usou o phrasal verb completo?", "O objeto veio depois da partícula?", "A frase faz sentido no passado ou no presente?"])
     ),
 
-    T(18, "Design", "Phrasal verbs do trabalho", "Phrasal verbs do trabalho",
-      M("We need to [come up with] a better idea.",
-        "Precisamos bolar uma ideia melhor.",
-        "No trabalho, os phrasal verbs aparecem o tempo todo. Eles são a versão informal de verbos mais formais: come up with é criar, set up é configurar, carry out é executar.",
-        "Pensa assim: é o apelido do verbo. Em reunião ninguém diz 'conceive an idea', todo mundo diz 'come up with'.",
+    T(18, "Arte", "Phrasal verbs de criar e montar", "Bolando e montando",
+      M("We need to [come up with] a bold concept.",
+        "Precisamos bolar um conceito ousado.",
+        "Esses phrasal verbs aparecem sempre que a gente cria ou organiza alguma coisa. Eles são a versão informal de verbos mais formais: come up with é criar, set up é montar, carry out é executar.",
+        "Pensa assim: é o apelido do verbo. Na conversa ninguém diz 'conceive an idea', todo mundo diz 'come up with'.",
         ["come up with = bolar, criar", "set up = montar, configurar", "carry out = executar, realizar", "check out = dar uma olhada"]),
       [
-        O("Vamos configurar o projeto hoje.", "Let's|set up|the project|today.", "set",
-          "Set up significa montar ou configurar, e o objeto vem depois: set up the project.",
-          "Set up: projeto de pé."),
-        O("A equipe vai executar o teste.", "The team|will|carry out|the test.", "carried out",
-          "Depois de will, o verbo fica na forma base: will carry out. Carry out significa executar.",
+        O("Vamos montar a exposição hoje.", "Let's|set up|the exhibition|today.", "set",
+          "Set up significa montar ou configurar, e o objeto vem depois: set up the exhibition.",
+          "Set up: exposição de pé."),
+        O("O ateliê vai realizar a oficina.", "The studio|will|carry out|the workshop.", "carried out",
+          "Depois de will, o verbo fica na forma base: will carry out. Carry out significa executar ou realizar.",
           "Carry out: tira do papel."),
-        C("Can you ___ this font? It's amazing.", ["check out", "check up", "check off"], 0,
+        C("Can you ___ this painting? It's amazing.", ["check out", "check up", "check off"], 0,
           "Check out significa dar uma olhada, e é o que a frase quer. Check off é riscar de uma lista.",
-          "Check out: olha só essa fonte."),
-        C("We have to ___ a new logo by Friday.", ["come up with", "come in", "come off"], 0,
+          "Check out: olha só essa pintura."),
+        C("We have to ___ a new title by Friday.", ["come up with", "come in", "come off"], 0,
           "Come up with significa criar ou bolar uma ideia.",
           "Come up with: a ideia saiu do nada."),
-        C("The designer will ___ the survey next week.", ["carry out", "carry on", "carry up"], 0,
-          "Carry out significa executar ou realizar, perfeito para uma pesquisa.",
-          "Carry out: a pesquisa vai rodar.")
+        C("The artist will ___ a color test next week.", ["carry out", "carry on", "carry up"], 0,
+          "Carry out significa executar ou realizar, perfeito para um teste.",
+          "Carry out: o teste vai rodar.")
       ],
       [
         ["We need to [come up with] a better ending.", "Precisamos bolar um final melhor."],
         ["We need to [come up with] a catchy chorus.", "Precisamos bolar um refrão grudento."],
-        ["We need to [come up with] a bold concept.", "Precisamos bolar um conceito ousado."],
-        ["We need to [come up with] a better idea.", "Precisamos bolar uma ideia melhor."],
-        ["We need to [come up with] a stronger slogan.", "Precisamos bolar um slogan mais forte."]
+        ["We need to [come up with] a bold concept.", "Precisamos bolar um conceito ousado."]
       ],
-      W("Escreva algo que você precisa criar, montar ou executar no trabalho.", "I need to ...",
-        ["We need to set up a meeting.", "I will carry out the research this week.", "I came up with an idea in the shower."],
-        ["Usou o phrasal verb completo?", "O verbo está no tempo certo?", "A frase faz sentido no ambiente de trabalho?"])
+      W("Escreva algo que você precisa criar, montar ou executar.", "I need to ...",
+        ["We need to set up the stage.", "I will carry out the experiment this week.", "I came up with an idea in the shower."],
+        ["Usou o phrasal verb completo?", "O verbo está no tempo certo?", "A frase faz sentido no contexto?"])
     ),
 
-    T(19, "Marketing", "Phrasal verbs de comunicação", "Falando de comunicação",
-      M("I will [find out] and [get back to] you.",
-        "Eu vou descobrir e te retorno.",
-        "Os phrasal verbs de comunicação aparecem em e-mails e reuniões: find out, point out, bring up, get back to, follow up.",
-        "Pensa assim: são as ferramentas do e-mail. Follow up é o lembrete gentil, get back to é a resposta que você promete.",
+    T(19, "Música", "Phrasal verbs de comunicação", "Falando de comunicação",
+      M("I will [find out] when the concert starts.",
+        "Eu vou descobrir quando o show começa.",
+        "Os phrasal verbs de comunicação aparecem em mensagens e conversas: find out, point out, bring up, get back to, follow up.",
+        "Pensa assim: são as ferramentas do chat. Follow up é o lembrete gentil, get back to é a resposta que você promete.",
         ["find out = descobrir", "point out = apontar, destacar", "bring up = trazer um assunto", "get back to = retornar para alguém", "follow up = dar seguimento"]),
       [
-        O("Vou trazer esse assunto na reunião.", "I|will|bring|it|up|in the meeting.", "on",
+        O("Vou trazer esse assunto no jantar.", "I|will|bring|it|up|at dinner.", "on",
           "Bring up é separável, e com pronome o it fica no meio: bring it up.",
           "Bring it up: o assunto na mesa."),
         O("Ela vai retornar pra você amanhã.", "She|will|get back to|you|tomorrow.", "gets",
           "Depois de will, o verbo fica na forma base. Get back to significa retornar pra alguém.",
           "Get back to: promessa de resposta."),
-        C("I'll ___ the budget and send you the details.", ["find out", "find on", "found out"], 0,
+        C("I'll ___ the setlist and send you the details.", ["find out", "find on", "found out"], 0,
           "Find out significa descobrir. Depois de I'll (I will), o verbo fica na forma base.",
           "Find out: investigação concluída."),
-        C("Can I ___ one thing about the report?", ["point out", "point on", "pointing out"], 0,
+        C("Can I ___ one thing about the lyrics?", ["point out", "point on", "pointing out"], 0,
           "Point out significa apontar ou destacar. Depois de can, o verbo fica na forma base.",
           "Point out: um detalhe que merece atenção."),
-        C("I'm writing to ___ on my last email.", ["follow up", "follow out", "follow in"], 0,
-          "Follow up on significa dar seguimento a algo, e é muito comum em e-mails de trabalho.",
+        C("I'm texting to ___ on my last message.", ["follow up", "follow out", "follow in"], 0,
+          "Follow up on significa dar seguimento a algo, e é muito comum em mensagens e e-mails.",
           "Follow up: o lembrete educado.")
       ],
       [
         ["I will [find out] when the movie starts.", "Eu vou descobrir quando o filme começa."],
         ["I will [find out] when the concert starts.", "Eu vou descobrir quando o show começa."],
-        ["I will [find out] when the gallery opens.", "Eu vou descobrir quando a galeria abre."],
-        ["I will [find out] which fonts they use.", "Eu vou descobrir quais fontes eles usam."],
-        ["I will [find out] and [get back to] you.", "Eu vou descobrir e te retorno."]
+        ["I will [find out] when the gallery opens.", "Eu vou descobrir quando a galeria abre."]
       ],
-      W("Escreva uma frase de e-mail usando um phrasal verb de comunicação.", "I will ...",
+      W("Escreva uma frase de mensagem usando um phrasal verb de comunicação.", "I will ...",
         ["I will follow up with you next week.", "I will find out and let you know.", "I would like to point out one detail."],
-        ["Usou o phrasal verb completo?", "Se usou it, ficou no meio?", "O tom ficou profissional?"])
+        ["Usou o phrasal verb completo?", "Se usou it, ficou no meio?", "O tom ficou natural?"])
     ),
 
     T(20, "Arte", "Verbo + preposição", "Verbo + preposição",
@@ -760,9 +732,7 @@
       [
         ["I am [waiting for] the next episode.", "Estou esperando o próximo episódio."],
         ["I am [listening to] a new album.", "Estou ouvindo um álbum novo."],
-        ["I am [looking for] a new gallery.", "Estou procurando uma galeria nova."],
-        ["I am [looking for] a new font.", "Estou procurando uma fonte nova."],
-        ["I am [waiting for] the client's reply.", "Estou esperando a resposta do cliente."]
+        ["I am [looking for] a new gallery.", "Estou procurando uma galeria nova."]
       ],
       W("Escreva sobre algo que você está esperando, procurando ou ouvindo.", "I am waiting for / looking for / listening to ...",
         ["I am waiting for the bus.", "I am listening to a podcast.", "I am looking for a new apartment."],
@@ -795,9 +765,7 @@
       [
         ["I want to [take up] filmmaking.", "Quero começar a fazer cinema."],
         ["I want to [take up] the guitar.", "Quero começar a tocar violão."],
-        ["I want to [take up] watercolor.", "Quero começar a pintar aquarela."],
-        ["I want to [take up] illustration.", "Quero começar a fazer ilustração."],
-        ["I want to [take up] a marketing course.", "Quero começar um curso de marketing."]
+        ["I want to [take up] watercolor.", "Quero começar a pintar aquarela."]
       ],
       W("Escreva um hábito que você quer começar, parar ou reduzir.", "I want to take up / cut down on / give up ...",
         ["I want to take up painting.", "I want to cut down on sweets.", "I don't want to give up my English routine."],
@@ -832,9 +800,7 @@
       [
         ["I love this movie [because] it makes me laugh.", "Eu amo esse filme porque ele me faz rir."],
         ["I love this song [because] it makes me dance.", "Eu amo essa música porque ela me faz dançar."],
-        ["I love this painting [because] it makes me think.", "Eu amo esse quadro porque ele me faz pensar."],
-        ["I love this logo [because] it is simple.", "Eu amo esse logo porque ele é simples."],
-        ["I love this campaign [because] it is honest.", "Eu amo essa campanha porque ela é honesta."]
+        ["I love this painting [because] it makes me think.", "Eu amo esse quadro porque ele me faz pensar."]
       ],
       W("Escreva algo que você gosta e por quê.", "I like ... because ...",
         ["I like this series because the characters are funny.", "It was raining, so I stayed home.", "I am late because of the traffic."],
@@ -868,71 +834,67 @@
       [
         ["The movie is long, [but] it is great.", "O filme é longo, mas é ótimo."],
         ["The song is old, [but] it is great.", "A música é antiga, mas é ótima."],
-        ["The painting is beautiful, [but] it is expensive.", "O quadro é lindo, mas é caro."],
-        ["The logo is simple, [but] it is memorable.", "O logo é simples, mas é marcante."],
-        ["The idea is risky, [but] it is exciting.", "A ideia é arriscada, mas é empolgante."]
+        ["The painting is beautiful, [but] it is expensive.", "O quadro é lindo, mas é caro."]
       ],
       W("Escreva uma frase com contraste: algo bom e algo ruim sobre a mesma coisa.", "It is ..., but ...",
         ["The course is hard, but I am learning a lot.", "The film is slow. However, the ending is great.", "My job is busy, but I like it."],
         ["Tem duas ideias em contraste?", "Usou but no meio ou However no começo da frase?", "Depois de However tem vírgula?"])
     ),
 
-    T(24, "Design", "Conectores de sequência", "Em que ordem?",
-      M("[First], sketch the idea. [Then], choose the colors. [Finally], export the file.",
-        "Primeiro, esboce a ideia. Depois, escolha as cores. Por fim, exporte o arquivo.",
+    T(24, "Cinema", "Conectores de sequência", "Em que ordem?",
+      M("[First], write the script. [Then], film the scenes. [Finally], edit the movie.",
+        "Primeiro, escreva o roteiro. Depois, filme as cenas. Por fim, edite o filme.",
         "Os conectores de sequência organizam o passo a passo: first, then, after that, finally. Eles ajudam o leitor a seguir o raciocínio.",
-        "Pensa assim: são as placas numeradas de uma exposição. 1, 2, 3, fim. Sem elas, a pessoa fica perdida.",
+        "Pensa assim: são as claquetes de uma gravação. Cena 1, cena 2, corta. Sem elas, ninguém sabe a ordem.",
         ["First, ... (começo)", "Then, Next, After that, ... (meio)", "Finally, Lastly, ... (fim)"],
         "Esses conectores abrem a frase e levam vírgula depois."),
       [
-        O("Primeiro, abra o arquivo.", "First,|open|the file.", "Finally,",
-          "First abre a sequência e leva vírgula: First, open the file.",
-          "First: a placa número 1."),
-        O("Depois disso, escolhemos as cores finais.", "After that,|we|choose|the final colors.", "Finally,",
-          "After that liga um passo ao anterior e leva vírgula: After that, we choose the final colors.",
+        O("Primeiro, escreva o roteiro.", "First,|write|the script.", "Finally,",
+          "First abre a sequência e leva vírgula: First, write the script.",
+          "First: a claquete número 1."),
+        O("Depois disso, filmamos a cena final.", "After that,|we|film|the final scene.", "Finally,",
+          "After that liga um passo ao anterior e leva vírgula: After that, we film the final scene.",
           "After that: o passo do meio."),
-        C("Step 1 of 3: ___, I open a blank canvas.", ["First", "Finally", "Although"], 0,
+        C("Step 1 of 3: ___, I write a short script.", ["First", "Finally", "Although"], 0,
           "Step 1 of 3 mostra que é o primeiro passo, então First. Finally ficaria para o último.",
           "First: começo de tudo."),
-        C("We are almost done. ___, save the file.", ["Finally", "First", "Because"], 0,
+        C("We are almost done. ___, edit the film.", ["Finally", "First", "Because"], 0,
           "Estamos quase no fim, então Finally marca o último passo.",
-          "Finally: a placa final."),
-        C("I sketch the idea. ___, I choose the colors.", ["Then", "Because", "Although"], 0,
-          "Then liga o passo seguinte: I sketch the idea. Then, I choose the colors.",
+          "Finally: a claquete final."),
+        C("I write the script. ___, I film the scenes.", ["Then", "Because", "Although"], 0,
+          "Then liga o passo seguinte: I write the script. Then, I film the scenes.",
           "Then: o próximo passo.")
       ],
       [
-        ["[First], write the script.", "Primeiro, escreva o roteiro."],
+        ["[First], write the script. [Then], film the scenes. [Finally], edit the movie.", "Primeiro, escreva o roteiro. Depois, filme as cenas. Por fim, edite o filme."],
         ["[First], write the lyrics.", "Primeiro, escreva a letra."],
-        ["[First], prepare the canvas.", "Primeiro, prepare a tela."],
-        ["[First], sketch the idea. [Then], choose the colors. [Finally], export the file.", "Primeiro, esboce a ideia. Depois, escolha as cores. Por fim, exporte o arquivo."],
-        ["[First], define the audience.", "Primeiro, defina o público."]
+        ["[First], prepare the canvas.", "Primeiro, prepare a tela."]
       ],
       W("Escreva 3 passos de algo que você sabe fazer usando first, then e finally.", "First, ... Then, ... Finally, ...",
-        ["First, I make coffee. Then, I check my emails. Finally, I plan my day.", "First, choose a topic. Then, write an outline. Finally, edit the text.", "First, open the app. Then, pick a lesson. Finally, enjoy it."],
+        ["First, I make coffee. Then, I check my messages. Finally, I plan my day.", "First, choose a topic. Then, write an outline. Finally, edit the text.", "First, open the app. Then, pick a lesson. Finally, enjoy it."],
         ["Usou first, then e finally?", "Colocou vírgula depois de cada conector?", "Os passos estão na ordem certa?"])
     ),
 
-    T(25, "Design", "Orações relativas: who, which, that", "Quem, qual, que",
-      M("The designer [who] made this logo is amazing.",
-        "O designer que fez esse logo é incrível.",
+    T(25, "Arte", "Orações relativas: who, which, that", "Quem, qual, que",
+      M("The painter [who] made this mural is amazing.",
+        "O pintor que fez esse mural é incrível.",
         "Who liga pessoas, which liga coisas e that serve para os dois. Eles juntam duas informações numa frase só.",
         "Pensa assim: são a cola de frase. Em vez de duas frases curtas, uma frase mais longa que ainda faz sentido.",
-        ["pessoa: who (ou that)", "coisa: which (ou that)", "The campaign that went viral = a campanha que viralizou"],
+        ["pessoa: who (ou that)", "coisa: which (ou that)", "The film that went viral = o filme que viralizou"],
         "Em inglês não repetimos o sujeito depois do who: the woman who works here, não the woman who she works here."),
       [
-        O("A empresa que lançou essa campanha é brasileira.", "The company|that|launched|this campaign|is Brazilian.", "who",
-          "Company é uma coisa (uma organização), então that. Who é para pessoas. Montando: The company + that + launched + this campaign + is Brazilian.",
-          "That: a cola entre a empresa e a campanha."),
-        O("Eu conheço a pessoa que escreveu o briefing.", "I know|the person|who|wrote|the brief.", "which",
-          "Person é gente, então who. Which é para coisas. Montando: the person + who + wrote + the brief.",
+        O("A galeria que abriu ontem é brasileira.", "The gallery|that|opened|yesterday|is Brazilian.", "who",
+          "Gallery é uma coisa (um lugar), então that. Who é para pessoas. Montando: The gallery + that + opened + yesterday + is Brazilian.",
+          "That: a cola entre a galeria e a novidade."),
+        O("Eu conheço a pessoa que pintou esse quadro.", "I know|the person|who|painted|this picture.", "which",
+          "Person é gente, então who. Which é para coisas. Montando: the person + who + painted + this picture.",
           "Who: apresentando a pessoa."),
-        C("The ad ___ I saw yesterday was funny.", ["who", "which", "whose"], 1,
-          "Ad é uma coisa, então which. Who é para pessoas.",
-          "Which: ligando o anúncio à informação."),
-        C("The woman ___ presented the campaign is my boss.", ["who", "which", "what"], 0,
+        C("The movie ___ I saw yesterday was funny.", ["who", "which", "whose"], 1,
+          "Movie é uma coisa, então which. Who é para pessoas.",
+          "Which: ligando o filme à informação."),
+        C("The woman ___ painted this mural is my teacher.", ["who", "which", "what"], 0,
           "Woman é uma pessoa, então who.",
-          "Who: ela, a apresentadora."),
+          "Who: ela, a pintora."),
         C("This is the app ___ helps me study.", ["who", "that", "what"], 1,
           "App é uma coisa, então that ou which. Entre as opções, that serve.",
           "That: o app que ajuda.")
@@ -940,9 +902,7 @@
       [
         ["The actor [who] won the award is my favorite.", "O ator que ganhou o prêmio é meu favorito."],
         ["The singer [who] won the award is my favorite.", "O cantor que ganhou o prêmio é meu favorito."],
-        ["The painter [who] made this mural is my favorite.", "O pintor que fez esse mural é meu favorito."],
-        ["The designer [who] made this logo is amazing.", "O designer que fez esse logo é incrível."],
-        ["The agency [that] launched this campaign is my favorite.", "A agência que lançou essa campanha é minha favorita."]
+        ["The painter [who] made this mural is amazing.", "O pintor que fez esse mural é incrível."]
       ],
       W("Escreva uma frase com who, which ou that sobre algo que você gosta.", "I like ... who/which/that ...",
         ["I like movies that make me think.", "The friend who introduced me to this band lives abroad.", "I love apps which are simple to use."],
@@ -976,9 +936,7 @@
       [
         ["If it [rains], we [will watch] a movie.", "Se chover, vamos assistir a um filme."],
         ["If it [rains], we [will listen] to music.", "Se chover, vamos ouvir música."],
-        ["If it [rains], we [will visit] a museum.", "Se chover, vamos visitar um museu."],
-        ["If it [rains], we [will work] on the project.", "Se chover, vamos trabalhar no projeto."],
-        ["If it [rains], we [will postpone] the event.", "Se chover, vamos adiar o evento."]
+        ["If it [rains], we [will visit] a museum.", "Se chover, vamos visitar um museu."]
       ],
       W("Escreva o que você vai fazer se algo acontecer.", "If ..., I will ...",
         ["If I finish early, I will watch a series.", "If it rains, I will take an umbrella.", "If you call me, I will answer."],
@@ -1012,9 +970,7 @@
       [
         ["If I [had] more time, I [would watch] more movies.", "Se eu tivesse mais tempo, assistiria a mais filmes."],
         ["If I [had] more time, I [would learn] the guitar.", "Se eu tivesse mais tempo, aprenderia violão."],
-        ["If I [had] more time, I [would paint] every day.", "Se eu tivesse mais tempo, pintaria todo dia."],
-        ["If I [had] more time, I [would redesign] my portfolio.", "Se eu tivesse mais tempo, redesenharia meu portfólio."],
-        ["If I [had] more time, I [would study] marketing.", "Se eu tivesse mais tempo, estudaria marketing."]
+        ["If I [had] more time, I [would paint] every day.", "Se eu tivesse mais tempo, pintaria todo dia."]
       ],
       W("Escreva o que você faria se pudesse, uma situação imaginária.", "If I ..., I would ...",
         ["If I had more money, I would travel more.", "If I could fly, I would visit Japan.", "If I were a director, I would make a comedy."],
@@ -1035,7 +991,7 @@
         O("Ela fez um esboço para que todos entendessem.", "She|made|a sketch|so that|everyone|understood.", "to",
           "O objetivo tem o próprio sujeito (everyone), então so that + sujeito + verbo.",
           "So that: o objetivo com sujeito próprio."),
-        C("He studies design ___ get a better job.", ["to", "for", "so"], 0,
+        C("He studies music ___ get a better job.", ["to", "for", "so"], 0,
           "A finalidade com o mesmo sujeito usa to + verbo base: to get.",
           "To get: o pra quê direto."),
         C("I wrote the brief clearly ___ everyone could understand it.", ["so that", "to", "for"], 0,
@@ -1048,18 +1004,16 @@
       [
         ["I watch movies [to] practice English.", "Eu assisto a filmes para praticar inglês."],
         ["I listen to songs [to] practice English.", "Eu ouço músicas para praticar inglês."],
-        ["I visit museums [to] get inspired.", "Eu visito museus para me inspirar."],
-        ["I use this tool [to] save time.", "Eu uso essa ferramenta para economizar tempo."],
-        ["I read case studies [to] learn new ideas.", "Eu leio estudos de caso para aprender ideias novas."]
+        ["I visit museums [to] get inspired.", "Eu visito museus para me inspirar."]
       ],
       W("Escreva algo que você faz e pra quê.", "I ... to ...",
         ["I take notes to remember ideas.", "I use this app to study English.", "I wake up early so that I can enjoy the morning."],
         ["Usou to + verbo base para a finalidade?", "Se o objetivo tem sujeito próprio, usou so that?", "Evitou for + verbo base?"])
     ),
 
-    T(29, "Design", "Although, even though e despite", "Mesmo assim",
-      M("[Although] it was simple, I loved the logo.",
-        "Embora fosse simples, eu amei o logo.",
+    T(29, "Cinema", "Although, even though e despite", "Mesmo assim",
+      M("[Although] it was long, I loved the movie.",
+        "Embora fosse longo, eu amei o filme.",
         "Although e even though (embora, mesmo que) mostram contraste dentro da mesma frase. Despite e in spite of vêm antes de um substantivo ou de um verbo com -ing.",
         "Pensa assim: although é a frase teimosa, o 'mesmo assim, eu vou'. Despite é a versão curta, sem verbo conjugado.",
         ["Although ou Even though + sujeito + verbo, ...", "Despite ou In spite of + substantivo ou -ing", "Não use although e but na mesma frase"],
@@ -1084,45 +1038,41 @@
       [
         ["[Although] it was long, I loved the movie.", "Embora fosse longo, eu amei o filme."],
         ["[Although] it was loud, I loved the concert.", "Embora estivesse alto, eu amei o show."],
-        ["[Although] it was raining, we went to the exhibition.", "Embora estivesse chovendo, fomos à exposição."],
-        ["[Although] it was simple, I loved the logo.", "Embora fosse simples, eu amei o logo."],
-        ["[Although] it was risky, we launched the campaign.", "Embora fosse arriscado, lançamos a campanha."]
+        ["[Although] it was raining, we went to the exhibition.", "Embora estivesse chovendo, fomos à exposição."]
       ],
       W("Escreva algo que você fez mesmo com um obstáculo.", "Although ..., I ...",
         ["Although I was tired, I went to class.", "Despite the traffic, I arrived on time.", "Even though it was late, we kept working."],
         ["Depois de although ou even though tem uma frase completa?", "Depois de despite tem um substantivo ou -ing?", "Evitou usar although e but juntos?"])
     ),
 
-    T(30, "Marketing", "Orações de tempo: when, as soon as, after, until", "Quando, antes, depois",
-      M("I will send the report [as soon as] I finish.",
-        "Vou enviar o relatório assim que terminar.",
+    T(30, "Arte", "Orações de tempo: when, as soon as, after, until", "Quando, antes, depois",
+      M("I will call you [as soon as] I leave the gallery.",
+        "Eu te ligo assim que sair da galeria.",
         "Em frases sobre o futuro com when, as soon as, before, after e until, o verbo depois do conector fica no presente simples, não no futuro.",
         "Pensa assim: o conector é o gatilho. O que vem depois dele é o 'quando isso acontecer', e quem manda no futuro é a frase principal.",
         ["Frase principal com will + conector + presente simples", "I will call you when I arrive", "until = até: Wait here until I come back"],
         "Errado: when I will arrive. Certo: when I arrive."),
       [
-        O("Eu te ligo quando chegar ao escritório.", "I will|call you|when|I arrive|at the office.", "will arrive",
+        O("Eu te ligo quando chegar à galeria.", "I will|call you|when|I arrive|at the gallery.", "will arrive",
           "Depois de when, o verbo fica no presente simples (arrive), não no futuro. O futuro fica na frase principal (I will call you).",
           "When + presente: o gatilho certinho."),
-        O("Vamos lançar a campanha depois que o cliente aprovar.", "We will|launch|the campaign|after|the client|approves.", "will approve",
-          "Depois de after, o verbo fica no presente (approves). Com the client, o verbo ganha s.",
-          "After + presente: o cliente aprova, a campanha sai."),
-        C("I will send the file as soon as I ___.", ["finish", "will finish", "finished"], 0,
+        O("Vamos abrir a exposição depois que o museu aprovar.", "We will|open|the exhibition|after|the museum|approves.", "will approve",
+          "Depois de after, o verbo fica no presente (approves). Com the museum, o verbo ganha s.",
+          "After + presente: o museu aprova, a exposição abre."),
+        C("I will send the sketch as soon as I ___.", ["finish", "will finish", "finished"], 0,
           "Depois de as soon as, o verbo fica no presente: finish.",
           "Finish: o gatilho no presente."),
         C("Please wait here ___ I come back.", ["until", "since", "for"], 0,
           "Until significa até, e é o que a frase quer: espere aqui até eu voltar.",
           "Until: esperando até a volta."),
-        C("We will celebrate ___ the campaign ends.", ["after", "ago", "during"], 0,
-          "After liga o momento da comemoração ao fim da campanha. O verbo depois dele fica no presente (ends).",
-          "After: festa depois do fim da campanha.")
+        C("We will celebrate ___ the exhibition ends.", ["after", "ago", "during"], 0,
+          "After liga o momento da comemoração ao fim da exposição. O verbo depois dele fica no presente (ends).",
+          "After: festa depois do fim da exposição.")
       ],
       [
         ["I will call you [after] the movie ends.", "Eu te ligo depois que o filme acabar."],
         ["I will call you [when] the concert ends.", "Eu te ligo quando o show acabar."],
-        ["I will call you [as soon as] I leave the gallery.", "Eu te ligo assim que sair da galeria."],
-        ["I will call you [as soon as] I finish the logo.", "Eu te ligo assim que terminar o logo."],
-        ["I will send the report [as soon as] I finish.", "Vou enviar o relatório assim que terminar."]
+        ["I will call you [as soon as] I leave the gallery.", "Eu te ligo assim que sair da galeria."]
       ],
       W("Escreva o que você vai fazer assim que algo acontecer.", "I will ... as soon as / when / after ...",
         ["I will rest as soon as I finish this task.", "I will call you when I get home.", "I will watch the movie after I finish my work."],

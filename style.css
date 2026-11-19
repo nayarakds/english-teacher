@@ -233,3 +233,9 @@ details.all[open] summary::after { content: "–"; }
 .rl-theme { display: inline-block; padding: 1px 9px; margin-right: 7px; border-radius: 99px; font-family: var(--heading); font-weight: 600; font-size: .72rem; color: var(--navy); vertical-align: 1px; }
 
 #fb { scroll-margin-bottom: calc(env(safe-area-inset-bottom, 0px) + 84px); }
+
+/* grupos da lista de lições */
+.grp + .grp { margin-top: 18px; }
+.grp h4 { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 2px; padding: 6px 6px 8px; font-family: var(--heading); font-weight: 700; font-size: 1.02rem; border-bottom: 2px solid var(--ink); }
+.grp h4 span { font-family: var(--body); font-weight: 500; font-size: .8rem; color: var(--muted); }
+.grp .row-lesson:first-of-type { border-top: 0; }
