@@ -84,23 +84,32 @@
     }
     return "M" + pts.join("L") + "Z";
   }
-  function dome(x, y) { return '<path d="M' + (x - 9) + " " + y + "a9 9 0 0 1 18 0z" + '"'; }
 
-  // cada forma: { body, face: [x, y, gap], prop (só no tamanho grande), box (enquadramento pequeno) }
+  // Cada personagem tem um corpo fixo e uma lista de "personalidades" (objeto ou acessório do tema).
+  // Cada lição pega uma delas, para os mascotes não repetirem sempre o mesmo objeto.
+  function dome(x, y, b) { return '<path d="M' + (x - 9) + " " + y + 'a9 9 0 0 1 18 0z" fill="' + b + '"/>'; }
   var SHAPES = {
-    // blob laranja pendurado numa barra (aqui, uma tira de filme)
+    // CINEMA: blob de pontas, pendurado ou segurando algo
     star: function (b) {
       var holes = "";
       for (var x = 46; x < 154; x += 12) holes += '<rect x="' + x + '" y="43.6" width="5" height="3" rx=".6"/><rect x="' + x + '" y="52.6" width="5" height="3" rx=".6"/>';
       return {
         body: '<path d="' + spikyBlob(100, 96) + '" fill="' + b + '" stroke="' + b + '" stroke-width="5" stroke-linejoin="round"/>',
         face: [100, 90, 17],
-        prop: '<path d="M40 36v100M160 36v100M30 136h20M150 136h20" ' + ln() + '/><rect x="40" y="42" width="120" height="14" rx="2" ' + ln() + '/><g fill="' + INK + '">' + holes + '</g>' +
-          '<path d="M62 42a9 9 0 0 1 18 0zM120 42a9 9 0 0 1 18 0z" fill="' + b + '"/>',
-        box: "50 46 100 100"
+        box: "50 46 100 100",
+        props: [
+          // tira de filme entre dois postes
+          '<path d="M40 36v100M160 36v100M30 136h20M150 136h20" ' + ln() + '/><rect x="40" y="42" width="120" height="14" rx="2" ' + ln() + '/><g fill="' + INK + '">' + holes + '</g>' + dome(71, 42, b) + dome(129, 42, b),
+          // claquete
+          '<rect x="68" y="28" width="64" height="22" rx="2" ' + ln("#fff") + '/><path d="M68 16h64v12H68z" ' + ln("#fff") + '/><path d="M82 16l-6 12M96 16l-6 12M110 16l-6 12M124 16l-6 12" ' + ln() + '/><path d="M78 38h22M78 44h38" ' + ln() + '/>' + dome(80, 52, b) + dome(120, 52, b),
+          // balde de pipoca
+          '<g ' + ln("#FFF6D6") + '><circle cx="80" cy="26" r="8"/><circle cx="94" cy="19" r="9"/><circle cx="108" cy="19" r="9"/><circle cx="121" cy="26" r="8"/></g><path d="M72 28h56l-6 26H78z" ' + ln("#fff") + '/><path d="M84 28l1.5 26M100 28v26M116 28l-1.5 26" stroke="#FF6B5B" stroke-width="5" fill="none"/>' + dome(78, 54, b) + dome(122, 54, b),
+          // óculos 3D
+          '<rect x="68" y="80" width="26" height="20" rx="6" fill="#FF4B4B" fill-opacity=".62" ' + ln().replace('fill="none" ', "") + '/><rect x="106" y="80" width="26" height="20" rx="6" fill="#3A86FF" fill-opacity=".62" ' + ln().replace('fill="none" ', "") + '/><path d="M94 88h12M68 86l-9-3M132 86l9-3" ' + ln() + '/>'
+        ]
       };
     },
-    // sol de dedos em leque, com vão entre eles, sobre uma base achatada, segurando um disco de vinil
+    // MÚSICA: sol de dedos em leque sobre uma base achatada
     sun: function (b) {
       var rays = "", angs = [156, 128, 102, 78, 52, 24], lens = [60, 66, 72, 72, 66, 60];
       angs.forEach(function (d, i) {
@@ -110,50 +119,88 @@
       return {
         body: '<path d="' + rays + '" stroke="' + b + '" stroke-width="20" stroke-linecap="round" fill="none"/><circle cx="100" cy="124" r="25" fill="' + b + '"/><rect x="18" y="124" width="164" height="26" rx="13" fill="' + b + '"/>',
         face: [100, 111, 13],
-        prop: '<g ' + ln() + '><circle cx="100" cy="30" r="19"/><circle cx="100" cy="30" r="13.5"/><circle cx="100" cy="30" r="5"/></g><circle cx="80" cy="46" r="7.5" fill="' + b + '"/><circle cx="120" cy="46" r="7.5" fill="' + b + '"/>',
-        box: "10 38 180 114"
+        box: "10 38 180 114",
+        props: [
+          // disco de vinil
+          '<g ' + ln() + '><circle cx="100" cy="30" r="19"/><circle cx="100" cy="30" r="13.5"/><circle cx="100" cy="30" r="5"/></g><circle cx="80" cy="46" r="7.5" fill="' + b + '"/><circle cx="120" cy="46" r="7.5" fill="' + b + '"/>',
+          // fones de ouvido
+          '<path d="M66 124a34 34 0 0 1 68 0" ' + ln() + ' stroke-width="4"/><rect x="58" y="112" width="15" height="28" rx="7" fill="' + INK + '"/><rect x="127" y="112" width="15" height="28" rx="7" fill="' + INK + '"/>',
+          // notas musicais
+          '<g ' + ln() + '><path d="M82 52V22l32-7v32M82 30l32-7"/><ellipse cx="76" cy="53" rx="8" ry="5.5" fill="' + INK + '" transform="rotate(-18 76 53)"/><ellipse cx="108" cy="46" rx="8" ry="5.5" fill="' + INK + '" transform="rotate(-18 108 46)"/></g>',
+          // microfone
+          '<g ' + ln() + '><circle cx="100" cy="28" r="14" fill="#fff"/><path d="M90 22l17 13M88 30l13 11M96 16l15 11"/><path d="M100 42v12"/></g><circle cx="86" cy="52" r="7.5" fill="' + b + '"/><circle cx="114" cy="52" r="7.5" fill="' + b + '"/>'
+        ]
       };
     },
-    // mitene lilás de dois dedos largos, segurando um pincel
+    // ARTE: mitene de dois dedos
     hand: function (b) {
       return {
         body: '<rect x="62" y="24" width="34" height="70" rx="17" fill="' + b + '"/><rect x="100" y="24" width="34" height="70" rx="17" fill="' + b + '"/><rect x="62" y="58" width="72" height="86" rx="27" fill="' + b + '"/>',
         face: [98, 102, 17],
-        prop: '<g transform="translate(28 0) rotate(-24 42 128)"><path d="M33 20c0-8 4-14 6-18 2 4 6 10 6 18z" ' + ln() + '/><rect x="31" y="20" width="16" height="12" rx="2" ' + ln() + '/><rect x="35" y="32" width="8" height="96" rx="4" ' + ln() + '/></g><circle cx="68" cy="134" r="11" fill="' + b + '"/>',
-        box: "50 18 96 134"
+        box: "50 18 96 134",
+        props: [
+          // pincel
+          '<g transform="translate(28 0) rotate(-24 42 128)"><path d="M33 20c0-8 4-14 6-18 2 4 6 10 6 18z" ' + ln() + '/><rect x="31" y="20" width="16" height="12" rx="2" ' + ln() + '/><rect x="35" y="32" width="8" height="96" rx="4" ' + ln() + '/></g><circle cx="68" cy="134" r="11" fill="' + b + '"/>',
+          // paleta de tintas
+          '<ellipse cx="38" cy="104" rx="27" ry="22" transform="rotate(-18 38 104)" ' + ln("#fff") + '/><circle cx="26" cy="96" r="4" fill="#FF6B6B"/><circle cx="40" cy="88" r="4" fill="#4D96FF"/><circle cx="55" cy="93" r="4" fill="#FFD93D"/><circle cx="32" cy="113" r="4.5" ' + ln("#A58DB8") + '/><circle cx="64" cy="128" r="11" fill="' + b + '"/>',
+          // boina
+          '<ellipse cx="98" cy="26" rx="38" ry="13" transform="rotate(-8 98 26)" fill="#E8554E"/><circle cx="119" cy="12" r="4" fill="#E8554E"/>'
+        ]
       };
     },
-    // quadrado arredondado segurando um lápis
+    // DESIGN: quadrado arredondado
     squircle: function (b) {
       return {
         body: '<rect x="50" y="44" width="100" height="98" rx="38" fill="' + b + '"/>',
         face: [100, 96, 21],
-        prop: '<g ' + ln() + '><rect x="34" y="34" width="112" height="14" rx="2"/><path d="M146 34l20 7-20 7z"/><path d="M44 34v14M158 38l8 3-8 3"/></g><path d="M68 40a9 9 0 0 1 18 0zM114 40a9 9 0 0 1 18 0z" fill="' + b + '"/>',
-        box: "44 34 112 114"
+        box: "44 34 112 114",
+        props: [
+          // lápis
+          '<g ' + ln() + '><rect x="34" y="34" width="112" height="14" rx="2"/><path d="M146 34l20 7-20 7z"/><path d="M44 34v14M158 38l8 3-8 3"/></g>' + dome(68, 40, b) + dome(114, 40, b),
+          // régua
+          '<rect x="38" y="32" width="124" height="16" rx="2" ' + ln("#fff") + '/><path d="M52 32v7M64 32v10M76 32v7M88 32v10M100 32v7M112 32v10M124 32v7M136 32v10M148 32v7" ' + ln() + '/>' + dome(68, 40, b) + dome(132, 40, b),
+          // amostras de cor
+          '<g stroke="' + INK + '" stroke-width="2.3"><rect x="46" y="28" width="26" height="20" rx="4" fill="#FF6B6B"/><rect x="76" y="28" width="26" height="20" rx="4" fill="#FFD93D"/><rect x="106" y="28" width="26" height="20" rx="4" fill="#4D96FF"/><rect x="136" y="28" width="26" height="20" rx="4" fill="#28AF60"/></g>' + dome(66, 40, b) + dome(120, 40, b),
+          // ponta de caneta vetorial
+          '<g ' + ln("#fff") + '><path d="M100 8l20 28-20 15-20-15z"/><circle cx="100" cy="30" r="4.5"/></g><path d="M100 34v14" ' + ln() + '/>' + dome(82, 44, b) + dome(118, 44, b)
+        ]
       };
     },
-    // cápsula inclinada com um megafone
+    // MARKETING: cápsula inclinada
     capsule: function (b) {
       return {
         body: '<g transform="rotate(-10 76 82)"><rect x="46" y="22" width="62" height="118" rx="31" fill="' + b + '"/></g>',
         face: [77, 64, 15],
-        prop: '<g ' + ln() + '><path d="M124 80h-10v22h10"/><path d="M124 80l36-19v60l-36-19z"/><path d="M118 102l-4 18h12l2-18"/><path d="M168 78q9 13 0 26M176 70q14 21 0 42"/></g><circle cx="116" cy="108" r="11" fill="' + b + '"/>',
-        box: "38 16 80 128"
+        box: "38 16 80 128",
+        props: [
+          // megafone
+          '<g ' + ln() + '><path d="M124 80h-10v22h10"/><path d="M124 80l36-19v60l-36-19z"/><path d="M118 102l-4 18h12l2-18"/><path d="M168 78q9 13 0 26M176 70q14 21 0 42"/></g><circle cx="116" cy="108" r="11" fill="' + b + '"/>',
+          // gráfico de barras
+          '<path d="M122 122V64M122 122h52" ' + ln() + '/><rect x="130" y="100" width="11" height="22" ' + ln("#fff") + '/><rect x="146" y="84" width="11" height="38" ' + ln("#fff") + '/><rect x="162" y="66" width="11" height="56" ' + ln("#fff") + '/><circle cx="114" cy="104" r="11" fill="' + b + '"/>',
+          // alvo com flecha
+          '<circle cx="142" cy="86" r="28" ' + ln("#fff") + '/><circle cx="142" cy="86" r="19" ' + ln("#FF6B5B") + '/><circle cx="142" cy="86" r="9" ' + ln("#fff") + '/><path d="M142 86l26-26M168 60h-9M168 60v9" ' + ln() + '/><circle cx="114" cy="106" r="11" fill="' + b + '"/>',
+          // balão de curtida
+          '<rect x="122" y="48" width="58" height="44" rx="14" ' + ln("#fff") + '/><path d="M132 92l-8 16 20-16" ' + ln("#fff") + '/><path d="M151 82c-13-8-13-20-5-20 3 0 5 3 5 4 0-1 2-4 5-4 8 0 8 12-5 20z" fill="#FF4B4B"/><circle cx="114" cy="108" r="11" fill="' + b + '"/>'
+        ]
       };
     }
   };
 
-  // big = true desenha o objeto do tema; senão, só o personagem com enquadramento justo
-  function mascotSVG(kind, mood, body, big) {
+  // big = true desenha a personalidade da lição (objeto ou acessório); senão, só o personagem
+  function mascotSVG(kind, mood, body, big, variant) {
     var s = (SHAPES[kind] || SHAPES.star)(body);
     mood = mood || "happy";
     var box = big ? "0 0 200 170" : s.box;
-    var hands = "";
-    return '<svg viewBox="' + box + '" aria-hidden="true">' + s.body + eyes(mood, s.face[0], s.face[1], s.face[2]) + (big ? s.prop : "") + "</svg>";
+    var prop = big ? s.props[(variant || 0) % s.props.length] : "";
+    return '<svg viewBox="' + box + '" aria-hidden="true">' + s.body + eyes(mood, s.face[0], s.face[1], s.face[2]) + prop + "</svg>";
+  }
+  // a n-ésima lição de um tema pega a n-ésima personalidade
+  function variantOf(lesson) {
+    return lessons.filter(function (l) { return l.theme === lesson.theme && l.id < lesson.id; }).length;
   }
   function mascotFor(lesson, mood, big) {
     var t = themeOf(lesson.theme);
-    return mascotSVG(t.mascot, mood, t.body, big);
+    return mascotSVG(t.mascot, mood, t.body, big, variantOf(lesson));
   }
 
   // ---------- sessão de uma lição ----------
