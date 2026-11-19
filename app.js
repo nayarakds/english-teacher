@@ -302,6 +302,12 @@
   var HIT_TITLES = ["Isso aí!", "Mandou bem.", "Na mosca.", "Acertou em cheio.", "É isso mesmo."];
   var MISS_TITLES = ["Quase. O certo é:", "Foi por pouco. O certo é:", "Ops, essa escapou. O certo é:", "Tudo bem, acontece. O certo é:"];
 
+  // rola até o feedback, deixando folga para a barra inferior do Safari
+  function revealFb() {
+    var f = document.getElementById("fb");
+    if (f && f.scrollIntoView) setTimeout(function () { f.scrollIntoView({ block: "end", behavior: "smooth" }); }, 60);
+  }
+
   function feedbackHTML(ok, answerText, ex) {
     return '<div class="fbp ' + (ok ? "right" : "wrong") + '">' +
       '<div class="fbtext">' +
@@ -358,7 +364,7 @@
         var given = placed.map(function (i) { return pool[i]; }).join(" ");
         var ok = norm(given) === norm(ex.answer);
         document.getElementById("zone").classList.add(ok ? "right" : "wrong");
-        document.getElementById("fb").innerHTML = feedbackHTML(ok, ex.answer, ex);
+        document.getElementById("fb").innerHTML = feedbackHTML(ok, ex.answer, ex); revealFb();
         document.getElementById("ok").textContent = isLast ? "Continuar" : "Próxima";
         draw();
         document.getElementById("ok").disabled = false;
@@ -394,7 +400,7 @@
           if (i === ex.answer) x.classList.add("right");
           else if (i === chosen) x.classList.add("wrong");
         });
-        document.getElementById("fb").innerHTML = feedbackHTML(ok, ex.prompt.replace("___", ex.options[ex.answer]), ex);
+        document.getElementById("fb").innerHTML = feedbackHTML(ok, ex.prompt.replace("___", ex.options[ex.answer]), ex); revealFb();
         document.getElementById("ok").textContent = isLast ? "Continuar" : "Próxima";
       };
     }
