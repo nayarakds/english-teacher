@@ -223,7 +223,9 @@
     for (var i = 0; i < n; i++) {
       html += '<span class="dot ' + (i < step ? "done" : i === step ? "now" : "") + '"></span>';
     }
-    return '<div class="top"><div class="dots" aria-hidden="true">' + html + '</div>' +
+    return '<div class="top">' +
+      (trail.length ? '<button class="iconbtn" id="back" aria-label="Voltar">‹</button>' : "") +
+      '<div class="dots" aria-hidden="true">' + html + '</div>' +
       '<button class="iconbtn" id="close" aria-label="Sair da lição">✕</button></div>';
   }
 
@@ -233,6 +235,8 @@
     window.scrollTo(0, 0);
     var close = document.getElementById("close");
     if (close) close.onclick = leave;
+    var back = document.getElementById("back");
+    if (back) back.onclick = function () { history.back(); };
     // leva o foco para o título da nova tela, senão leitor de tela e teclado ficam perdidos
     // depois que o innerHTML é trocado (não no primeiro carregamento)
     if (!firstRender) {
@@ -245,11 +249,34 @@
   // ---------- botão voltar do celular ----------
   // abrir uma lição empilha uma entrada no histórico; voltar (ou o ✕) retorna à home
   // em vez de fechar o app.
+  // cada tela nova da lição também empilha uma entrada: o botão ‹, o gesto de voltar do iPhone
+  // e o voltar do Android retornam à tela anterior (trail guarda por onde você passou).
   var inLesson = false;
+  var trail = [];
+  var exiting = false;
   function leave() {
-    if (inLesson) history.back(); else home();
+    if (!inLesson) { home(); return; }
+    exiting = true;
+    history.go(-(trail.length + 1)); // desfaz todas as entradas da lição de uma vez
   }
-  window.addEventListener("popstate", function () { inLesson = false; home(); });
+  function forward(change) {
+    trail.push({ step: step, exIndex: exIndex });
+    history.pushState({ lesson: L.id, n: trail.length }, "", "#licao-" + L.id);
+    change();
+    go();
+  }
+  window.addEventListener("popstate", function () {
+    if (!exiting && inLesson && trail.length) {
+      var t = trail.pop();
+      var txt = document.getElementById("txt"); // não perde a frase digitada ao voltar
+      if (txt && L) { saved.sentences[L.id] = txt.value; save(saved); }
+      step = t.step; exIndex = t.exIndex;
+      go();
+      return;
+    }
+    exiting = false; inLesson = false; trail = [];
+    home();
+  });
   if (location.hash) history.replaceState(null, "", location.pathname + location.search);
 
   // ---------- home ----------
@@ -292,13 +319,14 @@
     L = lessons.filter(function (l) { return l.id === id; })[0];
     setAccent(L.theme);
     if (!inLesson) { history.pushState({ lesson: id }, "", "#licao-" + id); inLesson = true; }
+    trail = [];
     step = 0; exIndex = 0;
     swapIndex = Math.max(0, (window.THEME_ORDER || []).indexOf(L.theme));
     go();
   }
 
   function go() { views[STEPS[step]](); }
-  function next() { step++; go(); }
+  function next() { forward(function () { step++; }); }
 
   // ---------- etapas ----------
   var views = {};
@@ -357,7 +385,7 @@
     var head = dots() +
       '<div class="card"><span class="tag">2 · Monte a frase · ' + (exIndex + 1) + "/" + total + "</span>";
 
-    function finish() { if (isLast) next(); else { exIndex++; views.build(); } }
+    function finish() { if (isLast) next(); else forward(function () { exIndex++; }); }
 
     if (ex.type === "order") {
       var placed = [];
@@ -514,7 +542,9 @@
       '<button class="btn ghost" id="again">Refazer essa lição</button>'
     );
     document.getElementById("home").onclick = leave;
-    document.getElementById("again").onclick = function () { startLesson(L.id); };
+    document.getElementById("again").onclick = function () {
+      forward(function () { step = 0; exIndex = 0; swapIndex = Math.max(0, (window.THEME_ORDER || []).indexOf(L.theme)); });
+    };
   };
 
   // ---------- início ----------
