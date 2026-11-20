@@ -227,12 +227,30 @@
       '<button class="iconbtn" id="close" aria-label="Sair da lição">✕</button></div>';
   }
 
+  var firstRender = true;
   function render(html) {
     app.innerHTML = '<div class="pop">' + html + "</div>";
     window.scrollTo(0, 0);
     var close = document.getElementById("close");
-    if (close) close.onclick = home;
+    if (close) close.onclick = leave;
+    // leva o foco para o título da nova tela, senão leitor de tela e teclado ficam perdidos
+    // depois que o innerHTML é trocado (não no primeiro carregamento)
+    if (!firstRender) {
+      var h = app.querySelector("h1, h2, .tag");
+      if (h) { h.setAttribute("tabindex", "-1"); h.focus({ preventScroll: true }); }
+    }
+    firstRender = false;
   }
+
+  // ---------- botão voltar do celular ----------
+  // abrir uma lição empilha uma entrada no histórico; voltar (ou o ✕) retorna à home
+  // em vez de fechar o app.
+  var inLesson = false;
+  function leave() {
+    if (inLesson) history.back(); else home();
+  }
+  window.addEventListener("popstate", function () { inLesson = false; home(); });
+  if (location.hash) history.replaceState(null, "", location.pathname + location.search);
 
   // ---------- home ----------
   function home() {
@@ -273,6 +291,7 @@
   function startLesson(id) {
     L = lessons.filter(function (l) { return l.id === id; })[0];
     setAccent(L.theme);
+    if (!inLesson) { history.pushState({ lesson: id }, "", "#licao-" + id); inLesson = true; }
     step = 0; exIndex = 0;
     swapIndex = Math.max(0, (window.THEME_ORDER || []).indexOf(L.theme));
     go();
@@ -363,9 +382,9 @@
       render(
         head +
         '<p class="pt">' + esc(ex.pt) + "</p>" +
-        '<div class="zone" id="zone" aria-label="Sua frase"></div>' +
+        '<div class="zone" id="zone" role="group" aria-label="Sua frase"></div>' +
         '<div class="pool" id="pool"></div>' +
-        '<div id="fb"></div>' +
+        '<div id="fb" role="status" aria-live="polite"></div>' +
         '<button class="btn" id="ok" disabled>Conferir</button></div>'
       );
       draw();
@@ -389,7 +408,7 @@
         '<div class="options" id="opts">' +
         ex.options.map(function (o, i) { return '<button class="opt" data-o="' + i + '">' + esc(o) + "</button>"; }).join("") +
         "</div>" +
-        '<div id="fb"></div>' +
+        '<div id="fb" role="status" aria-live="polite"></div>' +
         '<button class="btn" id="ok" disabled>Conferir</button></div>'
       );
       document.querySelectorAll("#opts [data-o]").forEach(function (b) {
@@ -408,8 +427,14 @@
         document.querySelectorAll("#opts .opt").forEach(function (x, i) {
           x.disabled = true;
           x.classList.remove("sel");
-          if (i === ex.answer) x.classList.add("right");
-          else if (i === chosen) x.classList.add("wrong");
+          // ✓/✕ além da cor (não depender só de verde e vermelho), com texto para leitor de tela
+          if (i === ex.answer) {
+            x.classList.add("right");
+            x.insertAdjacentHTML("beforeend", '<span class="mk" aria-hidden="true">✓</span><span class="sr">, resposta certa</span>');
+          } else if (i === chosen) {
+            x.classList.add("wrong");
+            x.insertAdjacentHTML("beforeend", '<span class="mk" aria-hidden="true">✕</span><span class="sr">, sua resposta, errada</span>');
+          }
         });
         document.getElementById("fb").innerHTML = feedbackHTML(ok, ex.prompt.replace("___", ex.options[ex.answer]), ex); revealFb();
         document.getElementById("ok").textContent = isLast ? "Continuar" : "Próxima";
@@ -437,7 +462,11 @@
       '<button class="btn" id="go">Próximo</button>'
     );
     document.querySelectorAll("#themes [data-t]").forEach(function (b) {
-      b.onclick = function () { swapIndex = Number(b.getAttribute("data-t")); views.swap(); };
+      b.onclick = function () {
+        swapIndex = Number(b.getAttribute("data-t")); views.swap();
+        var sel = document.querySelector("#themes .sel");
+        if (sel) sel.focus({ preventScroll: true }); // mantém o foco no tema escolhido
+      };
     });
     document.getElementById("go").onclick = next;
   };
@@ -451,7 +480,7 @@
       "<p>" + esc(o.prompt) + "</p>" +
       '<textarea id="txt" placeholder="' + esc(o.placeholder) + '" lang="en" autocapitalize="sentences" spellcheck="false">' + esc(prev) + "</textarea>" +
       '<button class="btn" id="show">Ver jeitos de dizer</button>' +
-      '<div id="models"></div>' +
+      '<div id="models" aria-live="polite"></div>' +
       "</div>" +
       '<button class="btn" id="go">Terminar</button>'
     );
@@ -484,7 +513,7 @@
       '<button class="btn" id="home">Voltar ao início</button>' +
       '<button class="btn ghost" id="again">Refazer essa lição</button>'
     );
-    document.getElementById("home").onclick = home;
+    document.getElementById("home").onclick = leave;
     document.getElementById("again").onclick = function () { startLesson(L.id); };
   };
 
