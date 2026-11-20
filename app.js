@@ -24,6 +24,8 @@
   var saved = load();
   saved.done = saved.done || {};
   saved.sentences = saved.sentences || {};
+  saved.read = saved.read || {};
+  var readings = window.READINGS || [];
 
   // ---------- utilidades ----------
   function esc(s) {
@@ -213,7 +215,9 @@
   // ---------- sessão de uma lição ----------
   var L = null;          // lição atual
   var step = 0;          // índice da etapa
-  var STEPS = ["mold", "build", "swap", "own", "end"];
+  var LESSON_STEPS = ["mold", "build", "swap", "own", "end"];
+  var READ_STEPS = ["rRead", "rFill", "rTrans", "end"];
+  var STEPS = LESSON_STEPS;
   var exIndex = 0;
   var swapIndex = 0;
 
@@ -308,15 +312,43 @@
       '<div class="panel big"><span class="mascot lg">' + mascotFor(next, "happy", true) + "</span></div>" +
       '<button class="btn" id="start" data-id="' + next.id + '">Começar</button>' +
       "</div>" +
-      (lessons.length > 1 ? '<details class="card all"><summary><h3>Todas as lições</h3><span class="small">' + doneCount + " de " + lessons.length + " feitas</span></summary><div class=\"lessons\">" + list + "</div></details>" : "")
+      (lessons.length > 1 ? '<details class="card all"><summary><h3>Todas as lições</h3><span class="small">' + doneCount + " de " + lessons.length + " feitas</span></summary><div class=\"lessons\">" + list + "</div></details>" : "") +
+      (readings.length ? readingsHTML() : "")
     );
     app.querySelectorAll("[data-id]").forEach(function (b) {
       b.onclick = function () { startLesson(Number(b.getAttribute("data-id"))); };
     });
+    app.querySelectorAll("[data-r]").forEach(function (b) {
+      b.onclick = function () { startReading(Number(b.getAttribute("data-r"))); };
+    });
+  }
+
+  function readingsHTML() {
+    var n = readings.filter(function (r) { return saved.read[r.id]; }).length;
+    var rows = readings.map(function (r) {
+      var t = themeOf(r.theme);
+      var done = saved.read[r.id];
+      return '<button class="row-lesson' + (done ? " is-done" : "") + '" data-r="' + r.id + '">' +
+        '<span class="dotc" style="background:' + t.panel + '"></span>' +
+        '<span class="rl-text">' + esc(r.title) + '<small><span class="rl-theme" style="background:' + t.panel + '">' + esc(r.theme) + "</span>" + esc(r.grammar) + "</small></span>" +
+        '<span class="rl-check">' + (done ? "✓" : "") + "</span></button>";
+    }).join("");
+    return '<details class="card all"><summary><h3>Leituras</h3><span class="small">' + n + " de " + readings.length + ' feitas</span></summary><p class="small" style="margin:10px 0 0">Um resumo curto para ler, completar com as palavras das lições e traduzir.</p><div class="lessons">' + rows + "</div></details>";
+  }
+
+  function startReading(id) {
+    L = readings.filter(function (r) { return r.id === id; })[0];
+    STEPS = READ_STEPS;
+    setAccent(L.theme);
+    if (!inLesson) { history.pushState({ lesson: id }, "", "#leitura-" + id); inLesson = true; }
+    trail = [];
+    step = 0; exIndex = 0;
+    go();
   }
 
   function startLesson(id) {
     L = lessons.filter(function (l) { return l.id === id; })[0];
+    STEPS = LESSON_STEPS;
     setAccent(L.theme);
     if (!inLesson) { history.pushState({ lesson: id }, "", "#licao-" + id); inLesson = true; }
     trail = [];
@@ -531,11 +563,150 @@
     };
   };
 
+  // ---------- leitura ----------
+  function plain(s) { return s.parts.map(function (p) { return p.t; }).join(""); }
+  function readingHTML(s) {
+    // sem destaque nas palavras dos espaços: na etapa 2 você precisa pensar, não lembrar da cor
+    return s.parts.map(function (p) { return esc(p.t); }).join("");
+  }
+
+  views.rRead = function () {
+    render(
+      dots() +
+      '<div class="card"><span class="tag">1 · Leia</span>' +
+      '<p class="small">' + esc(L.theme) + " · " + esc(L.grammar) + "</p>" +
+      '<h2 class="rtitle">' + esc(L.title) + "</h2>" +
+      '<p class="small" style="margin-top:10px">Toque numa frase para ver em português. Entenda a história, depois você vai completar o texto.</p>' +
+      '<div class="panel rpanel">' +
+      L.sentences.map(function (s, i) {
+        return '<button class="rsent" data-s="' + i + '" aria-expanded="false"><span class="ren">' + readingHTML(s) + '</span><span class="rpt" hidden>' + esc(s.pt) + "</span></button>";
+      }).join("") +
+      "</div></div>" +
+      '<button class="btn" id="go">Bora completar</button>'
+    );
+    document.querySelectorAll(".rsent").forEach(function (b) {
+      b.onclick = function () {
+        var pt = b.querySelector(".rpt");
+        var open = pt.hasAttribute("hidden");
+        if (open) pt.removeAttribute("hidden"); else pt.setAttribute("hidden", "");
+        b.setAttribute("aria-expanded", open ? "true" : "false");
+        b.classList.toggle("open", open);
+      };
+    });
+    document.getElementById("go").onclick = next;
+  };
+
+  views.rFill = function () {
+    var gaps = [];
+    L.sentences.forEach(function (s) { s.parts.forEach(function (p) { if (p.gap) gaps.push(p); }); });
+    var checked = false;
+    var oks = [];
+    function clean(s) { return String(s).toLowerCase().replace(/[’]/g, "'").replace(/\s+/g, " ").trim(); }
+    var gi = 0;
+    var text = L.sentences.map(function (s) {
+      return '<span class="rline">' + s.parts.map(function (p) {
+        if (!p.gap) return esc(p.t);
+        var g = gi++;
+        var w = Math.max(4, p.t.length + 1);
+        return '<input class="gapin" data-g="' + g + '" style="width:' + w + 'ch" type="text" inputmode="text" lang="en" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="espaço ' + (g + 1) + '">';
+      }).join("") + "</span>";
+    }).join("");
+    var help = shuffle(gaps.map(function (g) { return g.t; }).concat(L.extras || []));
+    render(
+      dots() +
+      '<div class="card"><span class="tag">2 · Complete</span>' +
+      "<p>Escreva a palavra que falta em cada espaço. Pense no sentido e na gramática.</p>" +
+      '<div class="panel rpanel"><p class="rtext" id="rtext">' + text + "</p></div>" +
+      '<button class="btn ghost sm" id="help" style="margin-top:12px">Preciso de ajuda</button>' +
+      '<div id="helpbox" class="helpbox" hidden><span class="small">Entre estas, algumas não servem:</span><div class="pool">' +
+      help.map(function (t) { return '<span class="chip" style="cursor:default">' + esc(t) + "</span>"; }).join("") + "</div></div>" +
+      '<div id="fb" role="status" aria-live="polite"></div>' +
+      '<button class="btn" id="ok" disabled>Conferir</button></div>'
+    );
+    var inputs = Array.prototype.slice.call(document.querySelectorAll("#rtext .gapin"));
+    function refresh() {
+      document.getElementById("ok").disabled = !checked && inputs.some(function (i) { return !i.value.trim(); });
+    }
+    inputs.forEach(function (inp, i) {
+      inp.oninput = refresh;
+      inp.onkeydown = function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          if (inputs[i + 1]) inputs[i + 1].focus(); else if (!document.getElementById("ok").disabled) document.getElementById("ok").click();
+        }
+      };
+    });
+    document.getElementById("help").onclick = function () {
+      document.getElementById("helpbox").removeAttribute("hidden");
+      this.style.display = "none";
+    };
+    document.getElementById("ok").onclick = function () {
+      if (checked) { next(); return; }
+      checked = true;
+      oks = gaps.map(function (g, i) { var v = clean(inputs[i].value); return v === clean(g.t) || (g.alts || []).some(function (a) { return v === clean(a); }); });
+      var wrongs = [];
+      oks.forEach(function (ok, i) { if (!ok) wrongs.push(i); });
+      var fb;
+      if (!wrongs.length) {
+        fb = '<div class="fbp right"><div class="fbtext"><div class="t">' + pick(HIT_TITLES) + '</div><div class="fun">Todos os espaços certos, sem banco de palavras. Leia o texto inteiro de novo, já completo.</div></div>' +
+          '<span class="mascot fb-m">' + mascotFor(L, "happy") + "</span></div>";
+      } else {
+        fb = '<div class="fbp wrong"><div class="fbtext"><div class="t">' + (gaps.length - wrongs.length) + " de " + gaps.length + ' certos. Veja os que faltaram:</div></div>' +
+          '<span class="mascot fb-m">' + mascotFor(L, "oops") + "</span>" +
+          '<div class="lbl">Por quê</div><div class="why">' +
+          wrongs.map(function (i) { return "<b>" + esc(gaps[i].t) + "</b>" + (gaps[i].hint ? ": " + esc(gaps[i].hint) : ""); }).join("<br>") +
+          "</div></div>";
+      }
+      document.getElementById("fb").innerHTML = fb; revealFb();
+      inputs.forEach(function (inp, i) {
+        inp.readOnly = true;
+        inp.classList.add(oks[i] ? "right" : "wrong");
+        if (!oks[i]) inp.insertAdjacentHTML("afterend", '<span class="fix">' + esc(gaps[i].t) + "</span>");
+      });
+      document.getElementById("help").style.display = "none";
+      document.getElementById("ok").textContent = "Continuar";
+      document.getElementById("ok").disabled = false;
+    };
+  };
+
+  views.rTrans = function () {
+    var idx = L.tr[exIndex];
+    var s = L.sentences[idx];
+    var total = L.tr.length;
+    var isLast = exIndex === total - 1;
+    var shown = false;
+    render(
+      dots() +
+      '<div class="card"><span class="tag">3 · Traduza · ' + (exIndex + 1) + "/" + total + "</span>" +
+      '<div class="panel rpanel"><div class="sentence rs-big">' + esc(plain(s)) + "</div></div>" +
+      '<textarea id="txt" placeholder="Escreva em português do seu jeito" lang="pt-BR" spellcheck="false"></textarea>' +
+      '<div id="fb" role="status" aria-live="polite"></div>' +
+      '<button class="btn" id="ok">Ver tradução</button></div>'
+    );
+    document.getElementById("ok").onclick = function () {
+      if (!shown) {
+        shown = true;
+        document.getElementById("txt").readOnly = true;
+        document.getElementById("fb").innerHTML =
+          '<div class="fbp right"><div class="fbtext"><div class="t">Uma tradução possível:</div><div class="ans">' + esc(s.pt) + "</div></div>" +
+          '<span class="mascot fb-m">' + mascotFor(L, "calm") + "</span>" +
+          '<div class="lbl">Compare</div><div class="why">Não precisa ficar igual, palavra por palavra. Se o sentido bateu, está certo.</div></div>';
+        revealFb();
+        document.getElementById("ok").textContent = isLast ? "Terminar" : "Próxima";
+        return;
+      }
+      if (isLast) { saved.read[L.id] = true; save(saved); next(); }
+      else forward(function () { exIndex++; });
+    };
+  };
+
   views.end = function () {
     render(
       '<section class="hero">' +
       '<h1>Pronto por hoje<span class="pop-dot">.</span></h1>' +
-      "<p>Você fez a lição de " + esc(L.grammar) + ". Amanhã tem outra, ou quando você quiser.</p>" +
+      (L.read
+        ? "<p>Você leu, completou e traduziu " + esc(L.title) + ". Amanhã tem outra, ou quando você quiser.</p>"
+        : "<p>Você fez a lição de " + esc(L.grammar) + ". Amanhã tem outra, ou quando você quiser.</p>") +
       "</section>" +
       '<div class="panel big celebrate"><span class="mascot lg">' + mascotFor(L, "happy", true) + "</span></div>" +
       '<button class="btn" id="home">Voltar ao início</button>' +
@@ -543,8 +714,7 @@
     );
     document.getElementById("home").onclick = leave;
     document.getElementById("again").onclick = function () {
-      forward(function () { step = 0; exIndex = 0; swapIndex = Math.max(0, (window.THEME_ORDER || []).indexOf(L.theme)); });
-    };
+      forward(function () { step = 0; exIndex = 0; swapIndex = Math.max(0, (window.THEME_ORDER || []).indexOf(L.theme)); });    };
   };
 
   // ---------- início ----------

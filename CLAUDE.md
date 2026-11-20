@@ -39,3 +39,7 @@ Site estático, sem build, sem dependências, sem testes.
 - Textos para a Nayara em pt-BR, sem travessão (—), usando vírgula ou ponto.
 - Nunca inventar regra gramatical: explicações curtas e verificáveis.
 - Para testar layout, usar largura real de celular (390px). O Edge headless impõe largura mínima e engana ao fingir 390px; renderizar dentro de um `<iframe style="width:390px">` resolve.
+
+## Leituras (reading.js)
+Seção "Leituras" na home, separada das lições. Cada leitura é um resumo curto de filme, música ou obra, com 3 etapas: Leia (toque na frase para ver a tradução, sem destacar as palavras), Complete (digitar a palavra em cada espaço; "Preciso de ajuda" mostra o banco com palavras que não servem) e Traduza (3 frases, ela escreve e compara com um modelo, sem correção automática).
+Formato: `R(id, tema, título, sobre, [lições], [S(frase, tradução)], [extras], [frases p/ traduzir])`. Espaços: `[palavra|dica|outra/outra]` (dica aparece só no erro; a terceira parte lista respostas alternativas válidas). Ids de leitura começam em 101. Resumos são texto original, sem trechos de letra de música; conferir fatos antes de incluir. Progresso em `saved.read`.
