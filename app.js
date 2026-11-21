@@ -333,8 +333,8 @@
       '<div class="panel big"><span class="mascot lg">' + mascotFor(next, "happy", true) + "</span></div>" +
       '<button class="btn" id="start" data-id="' + next.id + '">Começar</button>' +
       "</div>" +
-      weakHTML() +
       (lessons.length > 1 ? '<details class="card all"><summary><h3>Todas as lições</h3><span class="small">' + doneCount + " de " + lessons.length + " feitas</span></summary><div class=\"lessons\">" + list + "</div></details>" : "") +
+      weakHTML() +
       (readings.length ? readingsHTML() : "")
     );
     app.querySelectorAll("[data-id]").forEach(function (b) {
@@ -662,12 +662,15 @@
       '<div class="glossbar" id="gloss" hidden aria-live="polite"></div>' +
       '<button class="btn" id="go">Bora completar</button>'
     );
+    var glossTimer;
     document.querySelectorAll(".gw").forEach(function (w) {
       w.onclick = function (e) {
         e.stopPropagation(); // não abre a tradução da frase
         var gb = document.getElementById("gloss");
         gb.innerHTML = "<b>" + esc(w.textContent) + "</b> · " + esc(L.gloss[w.getAttribute("data-w")]);
         gb.removeAttribute("hidden");
+        clearTimeout(glossTimer);
+        glossTimer = setTimeout(function () { gb.setAttribute("hidden", ""); }, 3500);
       };
     });
     document.querySelectorAll(".rsent").forEach(function (b) {
@@ -688,75 +691,59 @@
     var checked = false;
     var oks = [];
     function clean(s) { return String(s).toLowerCase().replace(/[’]/g, "'").replace(/\s+/g, " ").trim(); }
-    // aceita "I've watched" / "'ve watched" no lugar de "have watched", e tira um "I" digitado antes
-    function fixInput(v) {
-      v = clean(v).replace(/^i(?=['’]?(ve|ll)\b)/, "").replace(/^i /, "");
-      return v.replace(/^'?ve\b/, "have").replace(/^'?ll\b/, "will");
-    }
-    // distância de edição de no máximo 1 (uma letra a mais, a menos ou trocada)
-    function lev1(a, b) {
-      if (a === b) return true;
-      if (Math.abs(a.length - b.length) > 1) return false;
-      var i = 0;
-      while (i < a.length && i < b.length && a[i] === b[i]) i++;
-      if (a.length === b.length) return a.slice(i + 1) === b.slice(i + 1);
-      if (a.length > b.length) return a.slice(i + 1) === b.slice(i);
-      return b.slice(i + 1) === a.slice(i);
-    }
-    // 0 = errado, 1 = certo, 2 = certo com erro de grafia (só palavras longas e que não sejam um distrator)
+    // 1 = certo, 0 = errado
     function judge(g, v) {
-      var c = fixInput(v);
-      var targets = [g.t].concat(g.alts || []).map(clean);
-      if (targets.indexOf(c) > -1) return 1;
-      var extras = (L.extras || []).map(clean);
-      if (c.length >= 6 && extras.indexOf(c) < 0 && targets.some(function (t) { return t.length >= 7 && lev1(c, t); })) return 2;
-      return 0;
+      return [g.t].concat(g.alts || []).map(clean).indexOf(clean(v)) > -1 ? 1 : 0;
+    }
+    // uma alternativa errada por espaço: sai das palavras extras da leitura, ou de outro espaço
+    function distractor(g) {
+      var ok = [g.t].concat(g.alts || []).map(clean);
+      var pool = (L.extras || []).filter(function (w) { return ok.indexOf(clean(w)) < 0; });
+      if (!pool.length) pool = gaps.map(function (x) { return x.t; }).filter(function (w) { return ok.indexOf(clean(w)) < 0; });
+      var d = pick(pool) || "-";
+      return /^[A-Z]/.test(g.t) ? d.charAt(0).toUpperCase() + d.slice(1) : d.charAt(0).toLowerCase() + d.slice(1);
     }
     var gi = 0;
     var text = L.sentences.map(function (s) {
       return '<span class="rline' + (s.br ? " newp" : "") + '">' + s.parts.map(function (p) {
         if (!p.gap) return esc(p.t);
         var g = gi++;
-        var w = Math.max(4, p.t.length + 1);
-        return '<input class="gapin" data-g="' + g + '" style="width:' + w + 'ch" type="text" inputmode="text" lang="en" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="espaço ' + (g + 1) + '">';
+        var opts = shuffle([p.t, distractor(p)]);
+        return '<span class="gopts" data-g="' + g + '" role="group" aria-label="espaço ' + (g + 1) + '">' + opts.map(function (o) {
+          return '<button type="button" class="gopt" data-v="' + esc(o) + '">' + esc(o) + "</button>";
+        }).join("") + "</span>";
       }).join("") + "</span>";
     }).join("");
-    var help = shuffle(gaps.map(function (g) { return g.t; }).concat(L.extras || []));
     render(
       dots() +
       '<div class="card"><span class="tag">2 · Complete</span>' +
-      "<p>Escreva a palavra que falta em cada espaço. Pense no sentido e na gramática.</p>" +
+      "<p>Toque na palavra que completa cada espaço. Pense no sentido e na gramática.</p>" +
       '<div class="panel rpanel"><p class="rtext" id="rtext">' + text + "</p></div>" +
-      '<button class="btn ghost sm" id="help" style="margin-top:12px">Preciso de ajuda</button>' +
-      '<div id="helpbox" class="helpbox" hidden><span class="small">Entre estas, algumas não servem:</span><div class="pool">' +
-      help.map(function (t) { return '<span class="chip" style="cursor:default">' + esc(t) + "</span>"; }).join("") + "</div></div>" +
       '<div id="fb" role="status" aria-live="polite"></div>' +
       '<button class="btn" id="ok" disabled>Conferir</button></div>'
     );
-    var inputs = Array.prototype.slice.call(document.querySelectorAll("#rtext .gapin"));
+    var groups = Array.prototype.slice.call(document.querySelectorAll("#rtext .gopts"));
+    var chosen = groups.map(function () { return ""; });
     function refresh() {
-      document.getElementById("ok").disabled = !checked && inputs.some(function (i) { return !i.value.trim(); });
+      document.getElementById("ok").disabled = !checked && chosen.some(function (c) { return !c; });
     }
-    inputs.forEach(function (inp, i) {
-      inp.oninput = refresh;
-      inp.onkeydown = function (e) {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          if (inputs[i + 1]) inputs[i + 1].focus(); else if (!document.getElementById("ok").disabled) document.getElementById("ok").click();
-        }
-      };
+    groups.forEach(function (grp, i) {
+      Array.prototype.forEach.call(grp.querySelectorAll(".gopt"), function (btn) {
+        btn.onclick = function () {
+          if (checked) return;
+          chosen[i] = btn.getAttribute("data-v");
+          Array.prototype.forEach.call(grp.querySelectorAll(".gopt"), function (o) { o.classList.toggle("sel", o === btn); });
+          refresh();
+        };
+      });
     });
-    document.getElementById("help").onclick = function () {
-      document.getElementById("helpbox").removeAttribute("hidden");
-      this.style.display = "none";
-    };
     document.getElementById("ok").onclick = function () {
       if (checked) { next(); return; }
       checked = true;
-      var verdict = gaps.map(function (g, i) { return judge(g, inputs[i].value); });
+      var verdict = gaps.map(function (g, i) { return judge(g, chosen[i]); });
       oks = verdict.map(function (v) { return v > 0; });
       var wrongs = [], nears = [];
-      verdict.forEach(function (v, i) { if (v === 0) wrongs.push(i); else if (v === 2) nears.push(i); });
+      verdict.forEach(function (v, i) { if (v === 0) wrongs.push(i); });
       wrongs.forEach(function (i) { slip(gaps[i].lesson); });
       var revs = [], seenL = {};
       wrongs.forEach(function (i) {
@@ -770,7 +757,7 @@
       var nearTxt = nears.length ? " Só confira a grafia de " + nears.map(function (i) { return "<b>" + esc(gaps[i].t) + "</b>"; }).join(", ") + "." : "";
       var fb;
       if (!wrongs.length) {
-        fb = '<div class="fbp right"><div class="fbtext"><div class="t">' + pick(HIT_TITLES) + '</div><div class="fun">Todos os espaços certos, sem banco de palavras. Leia o texto inteiro de novo, já completo.' + nearTxt + "</div></div>" +
+        fb = '<div class="fbp right"><div class="fbtext"><div class="t">' + pick(HIT_TITLES) + '</div><div class="fun">Todos os espaços certos. Leia o texto inteiro de novo, já completo.' + nearTxt + "</div></div>" +
           '<span class="mascot fb-m">' + mascotFor(L, "happy") + "</span></div>";
       } else {
         fb = '<div class="fbp wrong"><div class="fbtext"><div class="t">' + (gaps.length - wrongs.length) + " de " + gaps.length + ' certos. Veja os que faltaram:</div></div>' +
@@ -782,12 +769,14 @@
           "</div></div>";
       }
       document.getElementById("fb").innerHTML = fb; revealFb();
-      inputs.forEach(function (inp, i) {
-        inp.readOnly = true;
-        inp.classList.add(oks[i] ? "right" : "wrong");
-        if (!oks[i] || verdict[i] === 2) inp.insertAdjacentHTML("afterend", '<span class="fix">' + esc(gaps[i].t) + "</span>");
+      groups.forEach(function (grp, i) {
+        Array.prototype.forEach.call(grp.querySelectorAll(".gopt"), function (o) {
+          o.disabled = true;
+          var v = o.getAttribute("data-v");
+          if (judge(gaps[i], v)) o.classList.add("right");
+          else if (o.classList.contains("sel")) o.classList.add("wrong");
+        });
       });
-      document.getElementById("help").style.display = "none";
       document.getElementById("ok").textContent = "Continuar";
       document.getElementById("ok").disabled = false;
     };
