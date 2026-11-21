@@ -43,3 +43,8 @@ Site estático, sem build, sem dependências, sem testes.
 ## Leituras (reading.js)
 Seção "Leituras" na home, separada das lições. Cada leitura é um resumo curto de filme, música ou obra, com 3 etapas: Leia (toque na frase para ver a tradução, sem destacar as palavras), Complete (digitar a palavra em cada espaço; "Preciso de ajuda" mostra o banco com palavras que não servem) e Traduza (3 frases, ela escreve e compara com um modelo, sem correção automática).
 Formato: `R(id, tema, título, sobre, [lições], [S(frase, tradução)], [extras], [frases p/ traduzir])`. Espaços: `[palavra|dica|outra/outra]` (dica aparece só no erro; a terceira parte lista respostas alternativas válidas). Ids de leitura começam em 101. Resumos são texto original, sem trechos de letra de música; conferir fatos antes de incluir. Progresso em `saved.read`.
+
+### Leituras: glossário, erros e revisão
+- Formato do espaço: `[palavra|dica|outra/outra|idDaLição]`. O 4º campo liga o espaço à lição que ensina aquilo (alimenta o painel de erros). `"¶ "` abre parágrafo. O 9º argumento de `R(...)` é o glossário `{palavra: tradução}` (palavras sublinhadas na etapa 1, também usadas no checklist da etapa 3).
+- Digitação aceita contrações (`I've watched`), alternativas listadas e erro de uma letra em palavras de 7+ letras (marca como certo e pede para conferir a grafia). Distratores (`extras`) nunca contam como quase certo.
+- Erros: `saved.miss[idLição]` e `saved.missEx["idLição:nºExercício"]`. Errar em exercício ou espaço de leitura soma; acertar na Revisão subtrai. A home mostra as 5 lições com mais erros e o botão "Revisar agora" (até 8 exercícios das 3 piores lições, os errados primeiro). Sem placar de acertos, só pontos em aberto.

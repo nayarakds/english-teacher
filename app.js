@@ -25,7 +25,27 @@
   saved.done = saved.done || {};
   saved.sentences = saved.sentences || {};
   saved.read = saved.read || {};
+  saved.miss = saved.miss || {};     // id da lição -> quantos erros ainda estão em aberto
+  saved.missEx = saved.missEx || {}; // "idLição:númeroDoExercício" -> erros desse exercício
   var readings = window.READINGS || [];
+
+  function slip(lid, key) {
+    if (!lid) return;
+    saved.miss[lid] = (saved.miss[lid] || 0) + 1;
+    if (key) saved.missEx[key] = (saved.missEx[key] || 0) + 1;
+    save(saved);
+  }
+  // acertar na revisão tira um erro da lista
+  function recover(lid, key) {
+    if (key && saved.missEx[key] > 0) saved.missEx[key]--;
+    if (saved.miss[lid] > 0) saved.miss[lid]--;
+    save(saved);
+  }
+  function lessonById(id) { return allLessons.filter(function (l) { return l.id === id; })[0]; }
+  function weakLessons() {
+    return lessons.filter(function (l) { return saved.miss[l.id] > 0; })
+      .sort(function (a, b) { return saved.miss[b.id] - saved.miss[a.id]; });
+  }
 
   // ---------- utilidades ----------
   function esc(s) {
@@ -217,6 +237,7 @@
   var step = 0;          // índice da etapa
   var LESSON_STEPS = ["mold", "build", "swap", "own", "end"];
   var READ_STEPS = ["rRead", "rFill", "rTrans", "end"];
+  var REVIEW_STEPS = ["build", "end"];
   var STEPS = LESSON_STEPS;
   var exIndex = 0;
   var swapIndex = 0;
@@ -312,15 +333,58 @@
       '<div class="panel big"><span class="mascot lg">' + mascotFor(next, "happy", true) + "</span></div>" +
       '<button class="btn" id="start" data-id="' + next.id + '">Começar</button>' +
       "</div>" +
+      weakHTML() +
       (lessons.length > 1 ? '<details class="card all"><summary><h3>Todas as lições</h3><span class="small">' + doneCount + " de " + lessons.length + " feitas</span></summary><div class=\"lessons\">" + list + "</div></details>" : "") +
       (readings.length ? readingsHTML() : "")
     );
     app.querySelectorAll("[data-id]").forEach(function (b) {
       b.onclick = function () { startLesson(Number(b.getAttribute("data-id"))); };
     });
+    var rv = document.getElementById("review");
+    if (rv) rv.onclick = startReview;
     app.querySelectorAll("[data-r]").forEach(function (b) {
       b.onclick = function () { startReading(Number(b.getAttribute("data-r"))); };
     });
+  }
+
+  function weakHTML() {
+    var ranked = weakLessons();
+    if (!ranked.length) return "";
+    var top = ranked.slice(0, 5);
+    var max = saved.miss[top[0].id];
+    var rows = top.map(function (l) {
+      var t = themeOf(l.theme), n = saved.miss[l.id];
+      return '<button class="row-lesson" data-id="' + l.id + '">' +
+        '<span class="dotc" style="background:' + t.panel + '"></span>' +
+        '<span class="rl-text"><span class="rl-n">' + (lessons.indexOf(l) + 1) + "</span> " + esc(l.title) + "<small>" + esc(l.grammar) + "</small>" +
+        '<span class="missbar"><i style="width:' + Math.round(100 * n / max) + '%"></i></span></span>' +
+        '<span class="rl-miss">' + n + (n === 1 ? " erro" : " erros") + "</span></button>";
+    }).join("");
+    return '<div class="card weak"><h3>Onde você mais escorregou</h3>' +
+      '<p class="small" style="margin:8px 0 0">Contando exercícios e leituras. Errar faz parte: é aqui que a revisão ajuda. Acertar na revisão tira o erro da lista.</p>' +
+      '<div class="lessons">' + rows + "</div>" +
+      '<button class="btn" id="review">Revisar agora</button></div>';
+  }
+
+  function startReview() {
+    var ranked = weakLessons().slice(0, 3);
+    if (!ranked.length) return;
+    var exs = [];
+    ranked.forEach(function (l) {
+      var weak = [], rest = [];
+      l.exercises.forEach(function (e, i) {
+        var c = Object.assign({}, e, { _lid: l.id, _key: l.id + ":" + i });
+        (saved.missEx[c._key] > 0 ? weak : rest).push(c);
+      });
+      exs = exs.concat(weak, shuffle(rest).slice(0, weak.length ? 1 : 2));
+    });
+    L = { id: "rev", review: true, theme: ranked[0].theme, title: "Revisão", grammar: "Revisão dos seus pontos fracos", exercises: shuffle(exs).slice(0, 8) };
+    STEPS = REVIEW_STEPS;
+    setAccent(L.theme);
+    if (!inLesson) { history.pushState({ lesson: "rev" }, "", "#revisao"); inLesson = true; }
+    trail = [];
+    step = 0; exIndex = 0;
+    go();
   }
 
   function readingsHTML() {
@@ -415,7 +479,11 @@
     var isLast = exIndex === total - 1;
     var checked = false;
     var head = dots() +
-      '<div class="card"><span class="tag">2 · Monte a frase · ' + (exIndex + 1) + "/" + total + "</span>";
+      '<div class="card"><span class="tag">' + (L.review ? "Revisão" : "2 · Monte a frase") + " · " + (exIndex + 1) + "/" + total + "</span>";
+    function record(ok) {
+      var lid = ex._lid || L.id, key = ex._key || (L.id + ":" + exIndex);
+      if (ok) { if (L.review) recover(lid, key); } else slip(lid, key);
+    }
 
     function finish() { if (isLast) next(); else forward(function () { exIndex++; }); }
 
@@ -453,6 +521,7 @@
         checked = true;
         var given = placed.map(function (i) { return pool[i]; }).join(" ");
         var ok = norm(given) === norm(ex.answer);
+        record(ok);
         document.getElementById("zone").classList.add(ok ? "right" : "wrong");
         document.getElementById("fb").innerHTML = feedbackHTML(ok, ex.answer, ex); revealFb();
         document.getElementById("ok").textContent = isLast ? "Continuar" : "Próxima";
@@ -484,6 +553,7 @@
         if (checked) { finish(); return; }
         checked = true;
         var ok = chosen === ex.answer;
+        record(ok);
         document.querySelectorAll("#opts .opt").forEach(function (x, i) {
           x.disabled = true;
           x.classList.remove("sel");
@@ -565,9 +635,16 @@
 
   // ---------- leitura ----------
   function plain(s) { return s.parts.map(function (p) { return p.t; }).join(""); }
+  // sem destaque nas palavras dos espaços: na etapa 2 você precisa pensar, não lembrar da cor.
+  // só as palavras do glossário ficam sublinhadas (toque para ver o significado)
   function readingHTML(s) {
-    // sem destaque nas palavras dos espaços: na etapa 2 você precisa pensar, não lembrar da cor
-    return s.parts.map(function (p) { return esc(p.t); }).join("");
+    var g = L.gloss || {};
+    return s.parts.map(function (p) {
+      return p.t.split(/([A-Za-z][A-Za-z'’-]*)/).map(function (tok, i) {
+        if (i % 2 === 1 && g[tok.toLowerCase()]) return '<span class="gw" data-w="' + esc(tok.toLowerCase()) + '">' + esc(tok) + "</span>";
+        return esc(tok);
+      }).join("");
+    }).join("");
   }
 
   views.rRead = function () {
@@ -576,14 +653,23 @@
       '<div class="card"><span class="tag">1 · Leia</span>' +
       '<p class="small">' + esc(L.theme) + " · " + esc(L.grammar) + "</p>" +
       '<h2 class="rtitle">' + esc(L.title) + "</h2>" +
-      '<p class="small" style="margin-top:10px">Toque numa frase para ver em português. Entenda a história, depois você vai completar o texto.</p>' +
+      '<p class="small" style="margin-top:10px">Toque numa frase para ver em português, ou numa palavra sublinhada para ver o significado. Entenda a história, depois você vai completar o texto.</p>' +
       '<div class="panel rpanel">' +
       L.sentences.map(function (s, i) {
-        return '<button class="rsent" data-s="' + i + '" aria-expanded="false"><span class="ren">' + readingHTML(s) + '</span><span class="rpt" hidden>' + esc(s.pt) + "</span></button>";
+        return '<button class="rsent' + (s.br ? " newp" : "") + '" data-s="' + i + '" aria-expanded="false"><span class="ren">' + readingHTML(s) + '</span><span class="rpt" hidden>' + esc(s.pt) + "</span></button>";
       }).join("") +
       "</div></div>" +
+      '<div class="glossbar" id="gloss" hidden aria-live="polite"></div>' +
       '<button class="btn" id="go">Bora completar</button>'
     );
+    document.querySelectorAll(".gw").forEach(function (w) {
+      w.onclick = function (e) {
+        e.stopPropagation(); // não abre a tradução da frase
+        var gb = document.getElementById("gloss");
+        gb.innerHTML = "<b>" + esc(w.textContent) + "</b> · " + esc(L.gloss[w.getAttribute("data-w")]);
+        gb.removeAttribute("hidden");
+      };
+    });
     document.querySelectorAll(".rsent").forEach(function (b) {
       b.onclick = function () {
         var pt = b.querySelector(".rpt");
@@ -602,9 +688,33 @@
     var checked = false;
     var oks = [];
     function clean(s) { return String(s).toLowerCase().replace(/[’]/g, "'").replace(/\s+/g, " ").trim(); }
+    // aceita "I've watched" / "'ve watched" no lugar de "have watched", e tira um "I" digitado antes
+    function fixInput(v) {
+      v = clean(v).replace(/^i(?=['’]?(ve|ll)\b)/, "").replace(/^i /, "");
+      return v.replace(/^'?ve\b/, "have").replace(/^'?ll\b/, "will");
+    }
+    // distância de edição de no máximo 1 (uma letra a mais, a menos ou trocada)
+    function lev1(a, b) {
+      if (a === b) return true;
+      if (Math.abs(a.length - b.length) > 1) return false;
+      var i = 0;
+      while (i < a.length && i < b.length && a[i] === b[i]) i++;
+      if (a.length === b.length) return a.slice(i + 1) === b.slice(i + 1);
+      if (a.length > b.length) return a.slice(i + 1) === b.slice(i);
+      return b.slice(i + 1) === a.slice(i);
+    }
+    // 0 = errado, 1 = certo, 2 = certo com erro de grafia (só palavras longas e que não sejam um distrator)
+    function judge(g, v) {
+      var c = fixInput(v);
+      var targets = [g.t].concat(g.alts || []).map(clean);
+      if (targets.indexOf(c) > -1) return 1;
+      var extras = (L.extras || []).map(clean);
+      if (c.length >= 6 && extras.indexOf(c) < 0 && targets.some(function (t) { return t.length >= 7 && lev1(c, t); })) return 2;
+      return 0;
+    }
     var gi = 0;
     var text = L.sentences.map(function (s) {
-      return '<span class="rline">' + s.parts.map(function (p) {
+      return '<span class="rline' + (s.br ? " newp" : "") + '">' + s.parts.map(function (p) {
         if (!p.gap) return esc(p.t);
         var g = gi++;
         var w = Math.max(4, p.t.length + 1);
@@ -643,31 +753,57 @@
     document.getElementById("ok").onclick = function () {
       if (checked) { next(); return; }
       checked = true;
-      oks = gaps.map(function (g, i) { var v = clean(inputs[i].value); return v === clean(g.t) || (g.alts || []).some(function (a) { return v === clean(a); }); });
-      var wrongs = [];
-      oks.forEach(function (ok, i) { if (!ok) wrongs.push(i); });
+      var verdict = gaps.map(function (g, i) { return judge(g, inputs[i].value); });
+      oks = verdict.map(function (v) { return v > 0; });
+      var wrongs = [], nears = [];
+      verdict.forEach(function (v, i) { if (v === 0) wrongs.push(i); else if (v === 2) nears.push(i); });
+      wrongs.forEach(function (i) { slip(gaps[i].lesson); });
+      var revs = [], seenL = {};
+      wrongs.forEach(function (i) {
+        var id = gaps[i].lesson;
+        if (id && !seenL[id]) {
+          seenL[id] = 1;
+          var l = lessonById(id);
+          if (l) revs.push("Revise a lição " + (lessons.indexOf(l) + 1) + ": " + l.title + ".");
+        }
+      });
+      var nearTxt = nears.length ? " Só confira a grafia de " + nears.map(function (i) { return "<b>" + esc(gaps[i].t) + "</b>"; }).join(", ") + "." : "";
       var fb;
       if (!wrongs.length) {
-        fb = '<div class="fbp right"><div class="fbtext"><div class="t">' + pick(HIT_TITLES) + '</div><div class="fun">Todos os espaços certos, sem banco de palavras. Leia o texto inteiro de novo, já completo.</div></div>' +
+        fb = '<div class="fbp right"><div class="fbtext"><div class="t">' + pick(HIT_TITLES) + '</div><div class="fun">Todos os espaços certos, sem banco de palavras. Leia o texto inteiro de novo, já completo.' + nearTxt + "</div></div>" +
           '<span class="mascot fb-m">' + mascotFor(L, "happy") + "</span></div>";
       } else {
         fb = '<div class="fbp wrong"><div class="fbtext"><div class="t">' + (gaps.length - wrongs.length) + " de " + gaps.length + ' certos. Veja os que faltaram:</div></div>' +
           '<span class="mascot fb-m">' + mascotFor(L, "oops") + "</span>" +
           '<div class="lbl">Por quê</div><div class="why">' +
           wrongs.map(function (i) { return "<b>" + esc(gaps[i].t) + "</b>" + (gaps[i].hint ? ": " + esc(gaps[i].hint) : ""); }).join("<br>") +
+          (revs.length ? '<br><span class="rev">' + revs.map(esc).join("<br>") + "</span>" : "") +
+          (nearTxt ? "<br>" + nearTxt : "") +
           "</div></div>";
       }
       document.getElementById("fb").innerHTML = fb; revealFb();
       inputs.forEach(function (inp, i) {
         inp.readOnly = true;
         inp.classList.add(oks[i] ? "right" : "wrong");
-        if (!oks[i]) inp.insertAdjacentHTML("afterend", '<span class="fix">' + esc(gaps[i].t) + "</span>");
+        if (!oks[i] || verdict[i] === 2) inp.insertAdjacentHTML("afterend", '<span class="fix">' + esc(gaps[i].t) + "</span>");
       });
       document.getElementById("help").style.display = "none";
       document.getElementById("ok").textContent = "Continuar";
       document.getElementById("ok").disabled = false;
     };
   };
+
+  // pontos para comparar a tradução: sentido geral, palavras do glossário e o que os espaços ensinam
+  function checklistFor(s) {
+    var g = L.gloss || {}, seen = {};
+    var items = ["O sentido geral bate com o do modelo."];
+    plain(s).split(/([A-Za-z][A-Za-z'’-]*)/).forEach(function (tok, i) {
+      var k = tok.toLowerCase();
+      if (i % 2 === 1 && g[k] && !seen[k]) { seen[k] = 1; items.push("<b>" + esc(tok) + "</b> = " + esc(g[k])); }
+    });
+    s.parts.forEach(function (p) { if (p.gap && p.hint) items.push("<b>" + esc(p.t) + "</b>: " + esc(p.hint)); });
+    return items.slice(0, 5);
+  }
 
   views.rTrans = function () {
     var idx = L.tr[exIndex];
@@ -690,7 +826,8 @@
         document.getElementById("fb").innerHTML =
           '<div class="fbp right"><div class="fbtext"><div class="t">Uma tradução possível:</div><div class="ans">' + esc(s.pt) + "</div></div>" +
           '<span class="mascot fb-m">' + mascotFor(L, "calm") + "</span>" +
-          '<div class="lbl">Compare</div><div class="why">Não precisa ficar igual, palavra por palavra. Se o sentido bateu, está certo.</div></div>';
+          '<div class="lbl">Compare</div><div class="why">Não precisa ficar igual, palavra por palavra. Se o sentido bateu, está certo.</div></div>' +
+          '<h3 style="margin-top:20px">Confira se a sua tem</h3><ul class="checklist">' + checklistFor(s).map(function (c) { return "<li>" + c + "</li>"; }).join("") + "</ul>";
         revealFb();
         document.getElementById("ok").textContent = isLast ? "Terminar" : "Próxima";
         return;
@@ -706,14 +843,17 @@
       '<h1>Pronto por hoje<span class="pop-dot">.</span></h1>' +
       (L.read
         ? "<p>Você leu, completou e traduziu " + esc(L.title) + ". Amanhã tem outra, ou quando você quiser.</p>"
-        : "<p>Você fez a lição de " + esc(L.grammar) + ". Amanhã tem outra, ou quando você quiser.</p>") +
+        : L.review
+          ? "<p>Revisão feita. Os pontos em que você acertou saem da lista de erros.</p>"
+          : "<p>Você fez a lição de " + esc(L.grammar) + ". Amanhã tem outra, ou quando você quiser.</p>") +
       "</section>" +
       '<div class="panel big celebrate"><span class="mascot lg">' + mascotFor(L, "happy", true) + "</span></div>" +
       '<button class="btn" id="home">Voltar ao início</button>' +
-      '<button class="btn ghost" id="again">Refazer essa lição</button>'
+      (L.review ? "" : '<button class="btn ghost" id="again">Refazer essa lição</button>')
     );
     document.getElementById("home").onclick = leave;
-    document.getElementById("again").onclick = function () {
+    var again = document.getElementById("again");
+    if (again) again.onclick = function () {
       forward(function () { step = 0; exIndex = 0; swapIndex = Math.max(0, (window.THEME_ORDER || []).indexOf(L.theme)); });    };
   };
 
