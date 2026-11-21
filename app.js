@@ -697,6 +697,7 @@
     }
     // uma alternativa errada por espaço: sai das palavras extras da leitura, ou de outro espaço
     function distractor(g) {
+      if (g.wrong) return g.wrong;
       var ok = [g.t].concat(g.alts || []).map(clean);
       var pool = (L.extras || []).filter(function (w) { return ok.indexOf(clean(w)) < 0; });
       if (!pool.length) pool = gaps.map(function (x) { return x.t; }).filter(function (w) { return ok.indexOf(clean(w)) < 0; });
