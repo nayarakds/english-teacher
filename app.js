@@ -709,9 +709,8 @@
         if (!p.gap) return esc(p.t);
         var g = gi++;
         var opts = shuffle([p.t, distractor(p)]);
-        return '<span class="gopts" data-g="' + g + '" role="group" aria-label="espaço ' + (g + 1) + '">' + opts.map(function (o) {
-          return '<button type="button" class="gopt" data-v="' + esc(o) + '">' + esc(o) + "</button>";
-        }).join("") + "</span>";
+        var w = Math.max(4, p.t.length + 1);
+        return '<button type="button" class="gblank" data-g="' + g + '" data-opts="' + esc(opts.join("|")) + '" style="min-width:' + w + 'ch" aria-haspopup="listbox" aria-label="espaço ' + (g + 1) + ', toque para escolher">&nbsp;</button>';
       }).join("") + "</span>";
     }).join("");
     render(
@@ -722,21 +721,53 @@
       '<div id="fb" role="status" aria-live="polite"></div>' +
       '<button class="btn" id="ok" disabled>Conferir</button></div>'
     );
-    var groups = Array.prototype.slice.call(document.querySelectorAll("#rtext .gopts"));
+    var groups = Array.prototype.slice.call(document.querySelectorAll("#rtext .gblank"));
     var chosen = groups.map(function () { return ""; });
     function refresh() {
       document.getElementById("ok").disabled = !checked && chosen.some(function (c) { return !c; });
     }
-    groups.forEach(function (grp, i) {
-      Array.prototype.forEach.call(grp.querySelectorAll(".gopt"), function (btn) {
-        btn.onclick = function () {
-          if (checked) return;
-          chosen[i] = btn.getAttribute("data-v");
-          Array.prototype.forEach.call(grp.querySelectorAll(".gopt"), function (o) { o.classList.toggle("sel", o === btn); });
+    var pop = null;
+    function closePop() {
+      if (pop) { pop.parentNode.removeChild(pop); pop = null; }
+      groups.forEach(function (g) { g.classList.remove("open"); });
+    }
+    function openPop(i) {
+      var blank = groups[i];
+      var wasOpen = pop && blank.classList.contains("open");
+      closePop();
+      if (wasOpen) return;
+      blank.classList.add("open");
+      pop = document.createElement("div");
+      pop.className = "gpop";
+      pop.setAttribute("role", "listbox");
+      blank.getAttribute("data-opts").split("|").forEach(function (o) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "gpopt" + (chosen[i] === o ? " sel" : "");
+        b.setAttribute("role", "option");
+        b.textContent = o;
+        b.onclick = function (e) {
+          e.stopPropagation();
+          chosen[i] = o;
+          blank.textContent = o;
+          blank.classList.add("filled");
+          closePop();
           refresh();
         };
+        pop.appendChild(b);
       });
+      document.body.appendChild(pop);
+      var r = blank.getBoundingClientRect();
+      var pw = pop.offsetWidth;
+      var left = Math.min(Math.max(8, r.left + r.width / 2 - pw / 2), window.innerWidth - pw - 8);
+      pop.style.left = left + window.scrollX + "px";
+      pop.style.top = r.bottom + window.scrollY + 6 + "px";
+    }
+    groups.forEach(function (blank, i) {
+      blank.onclick = function (e) { e.stopPropagation(); if (!checked) openPop(i); };
     });
+    document.addEventListener("click", closePop);
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") closePop(); });
     document.getElementById("ok").onclick = function () {
       if (checked) { next(); return; }
       checked = true;
@@ -769,13 +800,11 @@
           "</div></div>";
       }
       document.getElementById("fb").innerHTML = fb; revealFb();
-      groups.forEach(function (grp, i) {
-        Array.prototype.forEach.call(grp.querySelectorAll(".gopt"), function (o) {
-          o.disabled = true;
-          var v = o.getAttribute("data-v");
-          if (judge(gaps[i], v)) o.classList.add("right");
-          else if (o.classList.contains("sel")) o.classList.add("wrong");
-        });
+      closePop();
+      groups.forEach(function (blank, i) {
+        blank.disabled = true;
+        blank.classList.add(oks[i] ? "right" : "wrong");
+        if (!oks[i]) blank.insertAdjacentHTML("afterend", '<span class="fix">' + esc(gaps[i].t) + "</span>");
       });
       document.getElementById("ok").textContent = "Continuar";
       document.getElementById("ok").disabled = false;
