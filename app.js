@@ -53,6 +53,44 @@
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
+  // Destaca palavras em inglês dentro de textos explicativos em pt-BR.
+  // O vocabulário vem das próprias frases em inglês das lições (sem marcar nada à mão).
+  // Comparação sensível a maiúsculas, para "Use" (pt) não casar com "use" (en).
+  var EN_SKIP = { a: 1, as: 1, me: 1, no: 1, so: 1, come: 1, use: 1, o: 1, do: 1, e: 1, da: 1, de: 1, um: 1, uma: 1, os: 1, na: 1, para: 1, com: 1, que: 1, ou: 1, th: 1, m: 1, s: 1, n: 1 };
+  var enVocab = null;
+  function buildVocab() {
+    var src = [];
+    function parts(p) { (p || []).forEach(function (x) { src.push(x.t); }); }
+    lessons.forEach(function (l) {
+      parts(l.mold.sentence);
+      (l.exercises || []).forEach(function (e) {
+        if (e.type === "order") { src.push(e.answer); (e.extra || []).forEach(function (x) { src.push(x); }); }
+        else { (e.options || []).forEach(function (x) { src.push(x); }); src.push(e.prompt); }
+      });
+      if (l.swap) l.swap.items.forEach(function (i) { parts(i.sentence); });
+      if (l.own && l.own.models) l.own.models.forEach(function (m) { src.push(m); });
+    });
+    var set = {};
+    src.join(" ").split(/[^\p{L}'’]+/u).forEach(function (w) { if (w && !EN_SKIP[w]) set[w] = true; });
+    return set;
+  }
+  function rich(s) {
+    if (!enVocab) enVocab = buildVocab();
+    var text = String(s), re = /[\p{L}'’]+/gu, m, last = 0, segs = [];
+    while ((m = re.exec(text))) {
+      var w = m[0];
+      if (!enVocab[w] && !(/^[A-Z][a-z']+$/.test(w) && enVocab[w.toLowerCase()])) continue;
+      var end = m.index + m[0].length, prev = segs[segs.length - 1];
+      if (prev && prev.en && text.slice(prev.b, m.index) === " ") prev.b = end; // junta palavras vizinhas
+      else { segs.push({ en: false, a: last, b: m.index }); segs.push({ en: true, a: m.index, b: end }); }
+      last = end;
+    }
+    segs.push({ en: false, a: last, b: text.length });
+    return segs.map(function (g) {
+      var t = esc(text.slice(g.a, g.b));
+      return g.en ? '<span class="en">' + t + "</span>" : t;
+    }).join("");
+  }
   function shuffle(arr) {
     var a = arr.slice();
     for (var i = a.length - 1; i > 0; i--) {
@@ -442,11 +480,11 @@
       "</div>" +
       '<div class="card">' +
       "<h3>Quando usar</h3>" +
-      '<p style="margin-top:8px">' + esc(m.explain) + "</p>" +
-      (m.analogy ? '<div class="analogy">' + esc(m.analogy) + "</div>" : "") +
+      '<p style="margin-top:8px">' + rich(m.explain) + "</p>" +
+      (m.analogy ? '<div class="analogy">' + rich(m.analogy) + "</div>" : "") +
       '<h3 style="margin-top:22px">Como montar</h3>' +
       '<ul class="formula">' + m.formula.map(function (f) { return "<li>" + esc(f) + "</li>"; }).join("") + "</ul>" +
-      (m.note ? '<h3 style="margin-top:22px">Atenção ao particípio</h3><p style="margin-top:8px">' + esc(m.note) + "</p>" : "") +
+      (m.note ? '<h3 style="margin-top:22px">Atenção ao particípio</h3><p style="margin-top:8px">' + rich(m.note) + "</p>" : "") +
       "</div>" +
       '<button class="btn" id="go">Bora praticar</button>'
     );
@@ -466,11 +504,11 @@
     return '<div class="fbp ' + (ok ? "right" : "wrong") + '">' +
       '<div class="fbtext">' +
       '<div class="t">' + (ok ? pick(HIT_TITLES) : pick(MISS_TITLES)) + "</div>" +
-      (ok ? (ex.right ? '<div class="fun">' + esc(ex.right) + "</div>" : "") : '<div class="ans">' + esc(answerText) + "</div>") +
+      (ok ? (ex.right ? '<div class="fun">' + rich(ex.right) + "</div>" : "") : '<div class="ans">' + esc(answerText) + "</div>") +
       "</div>" +
       '<span class="mascot fb-m">' + mascotFor(L, ok ? "happy" : "oops") + "</span>" +
       '<div class="lbl">Por quê</div>' +
-      '<div class="why">' + esc(ex.why) + "</div></div>";
+      '<div class="why">' + rich(ex.why) + "</div></div>";
   }
 
   views.build = function () {
